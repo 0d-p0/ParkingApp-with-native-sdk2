@@ -28,7 +28,7 @@ import { InternetStatusContext } from '../../App';
 import { AuthContext } from '../../Auth/AuthProvider';
 
 import { address } from '../../Router/address';
-// import ThermalPrinterModule from 'react-native-thermal-printer';
+ import ThermalPrinterModule from 'react-native-thermal-printer';
 import VehicleInOutStore from '../../Hooks/Sql/VehicleInOut/VehicleInOutStore';
 import getVehiclePrices from '../../Hooks/Controller/vechicles/getVehiclePrices';
 import { useIsFocused } from '@react-navigation/native';
@@ -120,17 +120,20 @@ const ReceiptScreen = ({ navigation }) => {
       ToastAndroid.show('please enable the bluetooth first', ToastAndroid.SHORT);
       return
     }
-     
-    let text = `${userDetails?.companyname.toUpperCase()}\n` +
-    '------------------------------------------------\n' +
-    `NAME : ${userDetails?.name.toUpperCase()}\n` +
-    `PHONE No. : ${userDetails?.user_id}\n` +
-    `LOCATION : ${userDetails?.location}\n` +
-    `SERIAL No. : ${userDetails?.imei_no}\n\n\n\n`
 
-   
     try {
-      MyNativeModule.printBill(text, 24).then(res => console.log(res)).catch(error => console.error(error))
+      await ThermalPrinterModule.printBluetooth({
+        payload: `[C]<u><font size='tall'>${userDetails?.companyname.toUpperCase()}</font></u>\n` +
+          '[c]-----------------------\n' +
+          `[L]<font size='normal'>NAME : ${userDetails?.name.toUpperCase()}</font>\n` +
+          `[L]<font size='normal'>PHONE No. : ${userDetails?.user_id}</font>\n` +
+          `[L]<font size='normal'>LOCATION : ${userDetails?.location}</font>\n` +
+          `[L]<font size='normal'>SERIAL No. : ${userDetails?.imei_no}</font>`,
+        printerNbrCharactersPerLine: 30,
+        printerDpi: 120,
+        printerWidthMM: 58,
+        mmFeedPaper: 25,
+      });
     } catch (err) {
       //error handling
       //
@@ -138,6 +141,7 @@ const ReceiptScreen = ({ navigation }) => {
       console.log(err.message);
     }
   };
+
 
   const getStoreVechiclesData = async () => {
     const data = await getVechiclesData();

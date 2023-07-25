@@ -81,13 +81,13 @@ const OperatorReport = ({ navigation }) => {
         if (pl) {
             return
         }
-        ;
 
-        [{ "TotalAdvance": 0, "opratorName": "Amit Mondal", "quantity": 2, "totalAmount": 160 }]
-        const extractedData = unbilledData && unbilledData.map(({ opratorName, quantity, TotalAdvance, totalAmount }) => ({
-            opratorName, quantity, TotalAdvance, totalAmount
-        }));
-        console.log("object ", extractedData)
+
+        const extractedData = unbilledData && unbilledData.map(({ opratorName, quantity, TotalAdvance, totalAmount }) => {
+            // opratorName, quantity, TotalAdvance, totalAmount
+            return `${opratorName.padEnd(19)}${quantity.toString().padEnd(9)}${TotalAdvance.toString().padEnd(12)}${totalAmount}\n`
+        }).join('');
+        // console.log("object ", extractedData)
         setpl(true)
         let headerPayload = 'OPERATOR RECEIPT\n'
         if (receiptSettings.header1_flag == "1") {
@@ -122,24 +122,21 @@ const OperatorReport = ({ navigation }) => {
         payload += "--------------------------------------------------------------------------\n"
         payload += "Operator          Qty       Advance       Amount\n "
         payload += "--------------------------------------------------------------------\n"
-        extractedData.forEach(({ opratorName, quantity, TotalAdvance, totalAmount }) => {
-            // const quantityLen = quantity.length
-            payload += `${"".toString().padEnd(1)}${opratorName.toString().padEnd(20)}${quantity.toString().padEnd(10)}${TotalAdvance}${"".padEnd(10)}${totalAmount}\n`;
-        });
-        payload += "--------------------------------------------------------------------\n"
-        payload += `TOTAL ${"".padEnd(12)}    ${extractedData.length}${"".toString().padEnd(9)} ${totalAdvance.toString().padEnd(9)} ${totalPrice.toString()} \n  `
+
+        payload += extractedData
+        payload += `${"TOTAL".padEnd(16)}    ${totalQTY.toString().padEnd(8)} ${totalAdvance.toString().padEnd(11)} ${totalPrice.toString()} \n  `
 
         let footerPayload = ""
         if (receiptSettings.footer1_flag == "1") {
             footerPayload += `${receiptSettings.footer1} \n`
         }
 
+
         if (receiptSettings.footer2_flag == "1") {
             footerPayload += `${receiptSettings.footer2} \n\n\n\n`
         }
 
         const mainPayLoad = addSpecialSpaces(payload)
-        console.log(mainPayLoad)
         try {
             MyModules.printBill(mainPayLoad, 18, false, (err, msg) => {
                 if (err) {

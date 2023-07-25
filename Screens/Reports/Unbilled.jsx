@@ -123,11 +123,10 @@ const Unbilled = ({ navigation }) => {
         ;
 
 
-        const extractedData = unbilledData && unbilledData.map(({ receiptNo, date_time_in, vehicle_no }) => ({
-            receiptNo,
-            date_time_in,
-            vehicle_no
-        }));
+        const extractedData = unbilledData && unbilledData.map(({ receiptNo, date_time_in, vehicle_no }) => {
+            const formatTime = new Date(date_time_in)
+            return `${receiptNo.toString().padEnd(14)}${vehicle_no.toString().padEnd(12)}${formatTime.toLocaleDateString("en-GB")}${" ".padEnd(5)}${formatTime.toLocaleTimeString(undefined, options)}\n`
+        }).join('')
         setpl(true)
 
         let headerPayload = 'UNBILLED RECEIPT\n'
@@ -144,17 +143,17 @@ const Unbilled = ({ navigation }) => {
             }
             console.warn(msg)
         })
-       
-        if(pic){
+
+        if (pic) {
             const picData = pic.split('data:image/jpeg;base64,')
-            MyModules.printImage(picData[1],(err,msg)=>{
-                if(err){
+            MyModules.printImage(picData[1], (err, msg) => {
+                if (err) {
                     console.error(err)
                 }
                 console.log(msg)
             })
         }
-     
+
         const imein = DeviceInfo.getSerialNumberSync();
         let payload = "-----------------------------------------------------------------------\n"
         payload += `DT: ${date.toLocaleDateString("en-GB")} TM: ${date.toLocaleTimeString(undefined, options)}\n`
@@ -163,22 +162,18 @@ const Unbilled = ({ navigation }) => {
         payload += "--------------------------------------------------------------------------\n"
         payload += "Receipt     Veh.no          Date         Time\n "
         payload += "--------------------------------------------------------------------\n"
-        extractedData.forEach(({ receiptNo, vehicle_no, date_time_in }) => {
-            const formatTime = new Date(date_time_in)
-            const vehicle_no_length = vehicle_no.length
-            payload += `${"".toString().padEnd(1)}${receiptNo.toString().padEnd(16 - vehicle_no_length)}${vehicle_no.toString().padEnd(10)}${formatTime.toLocaleDateString("en-GB")}${"".padEnd(5)}${formatTime.toLocaleTimeString(undefined, options)}\n`;
-        });
+        payload += extractedData
         payload += "-----------------------------------------------------------\n"
-        payload += `TOTAL    ${extractedData.length} \n  `
-        
+        payload += `TOTAL       ${unbilledData.length} \n  `
+
         let footerPayload = ""
         if (receiptSettings.footer1_flag == "1") {
             footerPayload += `${receiptSettings.footer1} \n`
-          }
-    
-          if (receiptSettings.footer2_flag == "1") {
+        }
+
+        if (receiptSettings.footer2_flag == "1") {
             footerPayload += `${receiptSettings.footer2} \n\n\n\n`
-          }
+        }
 
         const mainPayLoad = addSpecialSpaces(payload)
         // console.log(mainPayLoad)
@@ -190,8 +185,8 @@ const Unbilled = ({ navigation }) => {
                 }
                 console.log(msg)
             })
-            MyModules.printFooter(footerPayload,20,(err,msg)=>{
-                if(err){
+            MyModules.printFooter(footerPayload, 20, (err, msg) => {
+                if (err) {
                     console.error(err)
                 }
                 console.log(msg)
@@ -230,6 +225,7 @@ const Unbilled = ({ navigation }) => {
         if (value != 0) {
             setShowGenerate(true)
         }
+        handleGenerateReport()
     }, [mydateTo, mydateFrom])
 
     useEffect(() => {
@@ -301,40 +297,40 @@ const Unbilled = ({ navigation }) => {
                 {/* report genarate table */}
                 {unbilledData && <View>
                     <ScrollView>
-                    
-                            <View style={styles.container}>
-                                <View style={[styles.row, styles.header]}>
-                                    <Text style={[styles.headerText, styles.hcell]}>Receipt No</Text>
-                                    <Text style={[styles.headerText, styles.hcell]}>Vehicle No</Text>
-                                    <Text style={[styles.headerText, styles.hcell]}>In Time</Text>
 
-                                </View>
-                                {unbilledData && unbilledData.map((item, index) => {
-                                    const formatTime = new Date(item.date_time_in)
-                                    return <>
-                                        <View style={[styles.row, index % 2 != 0 ? styles.evenBg : styles.oddbg]} key={index}>
-                                            <Text style={[styles.cell]}>{item.receiptNo}</Text>
-                                            <Text style={[styles.cell]}>{item.vehicle_no}</Text>
-                                            <Text style={[styles.cell]}>{formatTime.toLocaleDateString("en-GB") + " " + formatTime.toLocaleTimeString()}</Text>
-                                            {/* <Text style={[styles.cell]}>{item.age}</Text> */}
-                                        </View>
-                                    </>
-                                })}
+                        <View style={styles.container}>
+                            <View style={[styles.row, styles.header]}>
+                                <Text style={[styles.headerText, styles.hcell]}>Receipt No</Text>
+                                <Text style={[styles.headerText, styles.hcell]}>Vehicle No</Text>
+                                <Text style={[styles.headerText, styles.hcell]}>In Time</Text>
 
-
-                                <View style={{
-                                    ...styles.header, borderTopRightRadius: PixelRatio.roundToNearestPixel(0),
-                                    borderTopLeftRadius: PixelRatio.roundToNearestPixel(0),
-                                }}>
-                                    <Text style={{ ...styles.headerText, ...styles.hcell, marginLeft: 10 }}>Total                             {unbilledData && unbilledData.length} </Text>
-                                </View>
-                                <View style={{
-
-                                }}>
-                                    <Text style={{ marginLeft: 10 }}>Report Generated on {date.toLocaleString()} </Text>
-                                </View>
                             </View>
-                       
+                            {unbilledData && unbilledData.map((item, index) => {
+                                const formatTime = new Date(item.date_time_in)
+                                return <>
+                                    <View style={[styles.row, index % 2 != 0 ? styles.evenBg : styles.oddbg]} key={index}>
+                                        <Text style={[styles.cell]}>{item.receiptNo}</Text>
+                                        <Text style={[styles.cell]}>{item.vehicle_no}</Text>
+                                        <Text style={[styles.cell]}>{formatTime.toLocaleDateString("en-GB") + " " + formatTime.toLocaleTimeString()}</Text>
+                                        {/* <Text style={[styles.cell]}>{item.age}</Text> */}
+                                    </View>
+                                </>
+                            })}
+
+
+                            <View style={{
+                                ...styles.header, borderTopRightRadius: PixelRatio.roundToNearestPixel(0),
+                                borderTopLeftRadius: PixelRatio.roundToNearestPixel(0),
+                            }}>
+                                <Text style={{ ...styles.headerText, ...styles.hcell, marginLeft: 10 }}>Total                             {unbilledData && unbilledData.length} </Text>
+                            </View>
+                            <View style={{
+
+                            }}>
+                                <Text style={{ marginLeft: 10 }}>Report Generated on {date.toLocaleString()} </Text>
+                            </View>
+                        </View>
+
                     </ScrollView>
                 </View>}
                 {/* back and print action button */}

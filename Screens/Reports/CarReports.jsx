@@ -1,4 +1,4 @@
-import { PixelRatio, Pressable, StyleSheet, Text, View, ScrollView, Dimensions, ActivityIndicator, Alert,NativeModules } from 'react-native'
+import { PixelRatio, Pressable, StyleSheet, Text, View, ScrollView, Dimensions, ActivityIndicator, Alert, NativeModules } from 'react-native'
 import React, { useEffect, useState } from 'react'
 import DateTimePicker from '@react-native-community/datetimepicker';
 import axios from 'axios'
@@ -97,7 +97,7 @@ const CarReports = ({ navigation }) => {
 
     console.log(unbilledData)
     const handleUnbilledPrint = async () => {
-        
+
         const options = {
             hour12: false,
             hour: '2-digit',
@@ -144,14 +144,16 @@ const CarReports = ({ navigation }) => {
         payload += `FROM: ${mydateFrom.toLocaleDateString("en-GB")}  TO: ${mydateTo.toLocaleDateString("en-GB")}\n`
         payload += `MC.ID: ${imein} \n`
         payload += "--------------------------------------------------------------------------\n"
-        payload += "Operator          Qty       Advance       Amount\n "
+        payload += "Operator     Qty         Advance      Amount\n "
         payload += "--------------------------------------------------------------------\n"
         extractedData.forEach(({ vehicleType, quantity, TotalAdvance, totalAmount }) => {
-            // const quantityLen = quantity.length
-            payload += `${"".toString().padEnd(1)}${vehicleType.toString().padEnd(20)}${quantity.toString().padEnd(10)}${TotalAdvance}${"".padEnd(10)}${totalAmount}\n`;
+            const quantityLen = quantity.toString().length
+            const vehicleTypeLen = vehicleType.toString().length
+            const TotalAdvanceLen = TotalAdvance.toString().length
+            payload += `${vehicleType.toString().padEnd(18 - vehicleTypeLen)}${quantity.toString().padEnd(15 - quantityLen)}${TotalAdvance.toString().padEnd(16 - TotalAdvanceLen)}${totalAmount}\n`;
         });
         payload += "--------------------------------------------------------------------\n"
-        payload += `TOTAL ${"".padEnd(9)}    ${extractedData.length}${"".toString().padEnd(9)} ${totalAdvance.toString().padEnd(9)} ${totalPrice.toString()} \n  `
+        payload += `TOTAL ${"".padEnd(5)}    ${totalQTY}${"".toString().padEnd(9)} ${totalAdvance.toString().padEnd(13)} ${totalPrice.toString()} \n  `
 
         let footerPayload = ""
         if (receiptSettings.footer1_flag == "1") {
@@ -216,7 +218,7 @@ const CarReports = ({ navigation }) => {
                 return sum + amount;
             }, 0);
             setTotalAdvance(totalAdvance)
-            
+
             setValue(0)
             setShowGenerate(false)
             setLoading(false)
@@ -340,8 +342,8 @@ const CarReports = ({ navigation }) => {
                 {/* back and print action button */}
                 <View style={styles.actionButton}>
                     {showGenerate && <CustomButtonComponent.GoButton title={"Generate Report"} style={{ flex: 1, marginLeft: 10 }} onAction={() => handleGenerateReport()} />}
-                    {  <CustomButtonComponent.CancelButton title={"Back"} style={{ flex: 1, marginRight: 10 }} onAction={() => navigation.goBack()} />}
-                    { unbilledData &&  <CustomButtonComponent.GoButton title={"Print Report"} style={{ flex: 1, marginLeft: 10 }} onAction={() => handleUnbilledPrint()} />}
+                    {<CustomButtonComponent.CancelButton title={"Back"} style={{ flex: 1, marginRight: 10 }} onAction={() => navigation.goBack()} />}
+                    {unbilledData && <CustomButtonComponent.GoButton title={"Print Report"} style={{ flex: 1, marginLeft: 10 }} onAction={() => handleUnbilledPrint()} />}
                 </View>
             </View>
         </View>

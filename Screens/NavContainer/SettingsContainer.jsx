@@ -20,9 +20,9 @@ const SettingsContainer = () => {
             <Stack.Screen name="setting" component={SettingScreen} />
             <Stack.Screen name="general_setting" component={GenaralSettingScreen} />
             <Stack.Screen name="change_password" component={ChangePassword} />
-            <Stack.Screen name="gst_setting" component={GSTSettingScreen} />
+            {/* <Stack.Screen name="gst_setting" component={GSTSettingScreen} /> */}
      
-            <Stack.Screen name="printer_cleaning" component={PrinterCleaning} />
+            {/* <Stack.Screen name="printer_cleaning" component={PrinterCleaning} /> */}
 
             <Stack.Screen name="receipt_settings" component={ReceiptSetting} />
 

@@ -1,7 +1,5 @@
 import {PixelRatio, StyleSheet, Text, View, TextInput} from 'react-native';
 import React from 'react';
-import RoundedInputComponent from './RoundedInputComponent';
-import InputComponent from './InputComponent';
 import allColor from '../Resources/Colors/Color';
 
 const InputComponentWithText = ({show,value,onChangeText,placeholder,text}) => {
@@ -11,6 +9,7 @@ const InputComponentWithText = ({show,value,onChangeText,placeholder,text}) => {
         style={[styles.text, styles.input]}
         onChangeText={onChangeText}
         value={value}
+        // if place Holder Available show *placeholder value or show the "enter Value"
         placeholder={placeholder||"enter value"}
         keyboardType={'number-pad'}
         editable={false}

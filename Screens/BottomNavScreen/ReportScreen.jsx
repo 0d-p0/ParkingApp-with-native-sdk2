@@ -8,50 +8,7 @@ import UserDetails from '../Settings/UserDetails'
 import icons from '../../Resources/Icons/icons'
 
 const ReportScreen = ({ navigation }) => {
-  // const {ding} = playSound()
 
-  let data = [
-    { data: "ok" },
-    { data: "ok" },
-    { data: "ok" },
-    { data: "ok" },
-    { data: "ok" },
-    { data: "ok" },
-    { data: "ok" },
-    { data: "ok" },
-    { data: "ok" },
-    { data: "ok" },
-    { data: "ok" },
-    { data: "ok" },
-    { data: "ok" },
-    { data: "ok" },
-    { data: "ok" },
-    { data: "ok" },
-    { data: "ok" },
-    { data: "ok" },
-    { data: "ok" },
-    { data: "ok" },
-    { data: "ok" },
-    { data: "ok" },
-    { data: "ok" },
-    { data: "ok" },
-    { data: "ok" },
-    { data: "ok" },
-    { data: "ok" },
-    { data: "ok" },
-  ]
-  data.length = 20
-
-
-  // React.useEffect(() => {
-  //   const unsubscribe = navigation.addListener('tabPress', (e) => {
-  //     // console.warn("hello")
-
-  //      ding.play()
-  //   });
-
-  //   return unsubscribe;
-  // }, [navigation]);
   return (
     <MainView>
       {/* header */}
@@ -73,15 +30,7 @@ const ReportScreen = ({ navigation }) => {
          
         </View>
       </ScrollView>
-      {/* <ScrollView>
-       <View style={styles.report_container}>
-        {data.map((props,index)=>(
-          <View style={styles.ActionBox_style} key={index} >
-            <ActionBox onAction={()=>alert("this feature not available now")}/>
-            </View>
-        ))}
-       </View>
-    </ScrollView> */}
+      
     </MainView>
   )
 }

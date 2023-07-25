@@ -1,34 +1,20 @@
-import {StyleSheet, Text, View} from 'react-native';
-import React, {useContext,useState,useEffect} from 'react';
+import {Text, View} from 'react-native';
+import React, {useContext} from 'react';
 import {NavigationContainer} from '@react-navigation/native';
 
 import {createNativeStackNavigator} from '@react-navigation/native-stack';
 
-import getAuthUser from '../../Hooks/getAuthUser';
 import BottomNavigation from '../../Navigation/BottomNavigation/BottomNavigation';
-import CreateReceipt from '../RECEIPT/CreateReceipt';
-import GenaralSettingScreen from '../Settings/GenaralSettingScreen';
-import ChangePassword from '../Settings/ChangePassword';
-import GSTSettingScreen from '../Settings/GSTSettingScreen';
 import SignInScreen from '../AccountManagement/SignInScreen';
 import SignUpScreen from '../AccountManagement/SignUpScreen';
 import ForgotPassword from '../AccountManagement/ForgotPassword';
 import {AuthContext} from '../../Auth/AuthProvider';
-import PrinterCleaning from '../Settings/PrinterCleaning';
-import EraseData from '../Settings/EraseData';
-import OperatorManagement from '../Settings/OperatorManagement';
-import AddNewOperator from '../Operator Management/AddNewOperator';
-import ShiftManagement from '../Settings/ShiftManagement';
-import AddnewShift from '../ShifManagement/AddnewShift';
-import UserDetails from '../Settings/UserDetails';
 import Scanner from '../../component/Scanner';
 import PrintUi from '../PrintUi/PrintUi';
 import OutpassPrintUI from '../PrintUi/OutpassPrintUI';
-import ReportDetails from '../REPORT DETAILS/ReportDetails';
 import CarReports from '../Reports/CarReports';
 import OperatorReport from '../Reports/OperatorReport';
 import Unbilled from '../Reports/Unbilled';
-import SplashScreen from '../Splash Screen/SplashScreen';
 
 const Stack = createNativeStackNavigator();
 const NavContainer = () => {

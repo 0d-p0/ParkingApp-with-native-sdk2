@@ -49,9 +49,7 @@ const OutpassScreen = ({ navigation }) => {
   const [vp, svp] = useState();
 
   const [duration, setDuration] = useState('pritam');
-  // const { ding } = playSound()
-  const [value, setValue] = useState(null);
-  const [isFocus, setIsFocus] = useState(false);
+
 
   const entrydate = new Date(data?.[0]?.time || data?.[0]?.date_time_in);
 
@@ -116,11 +114,13 @@ const OutpassScreen = ({ navigation }) => {
     start_time,
     end_time,
   ) {
+    // get Vehicle Rates By Id From Local Storage
     const result = await getVehicleRatesByVehicleId(vehicleId);
 
-    console.log(" result us -----", result)
+    // console.log(" result us -----", result)
 
     if (result[0].rate_type == 'H') {
+      // If Rate type is H, H For Hourly
       const price = HourlyPriceCalculate(
         result,
         start_time,
@@ -130,6 +130,7 @@ const OutpassScreen = ({ navigation }) => {
     }
 
     if (result[0].rate_type == 'T') {
+        // If Rate type is T, T For Timely
       const testStrtT = new Date(start_time);
       const testEndT = new Date(end_time);
 
@@ -141,6 +142,7 @@ const OutpassScreen = ({ navigation }) => {
     }
   }
 
+  // Calculate Total Duration
   function calculateDuration(inTimestamp, outTimestamp) {
     let duration = '';
     const diffInMilliseconds = Math.abs(inTimestamp - outTimestamp);
@@ -250,8 +252,7 @@ const OutpassScreen = ({ navigation }) => {
         ' ' +
         date.toLocaleTimeString(undefined, options),
     });
-    // ATA PORE DEKHTE HOBE
-
+  
     vData.push({
       label: 'DURATION',
       value: totalDuration,

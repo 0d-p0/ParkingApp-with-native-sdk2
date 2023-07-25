@@ -1,15 +1,10 @@
 import {
-  SafeAreaView,
   Text,
   View,
-  Image,
   TouchableOpacity,
-  Pressable,
   ScrollView,
-  Platform,
 } from 'react-native';
-import React, {useContext, useEffect, useState} from 'react';
-import logo from '../../Resources/Logo/logo.png';
+import React, {useContext, useState} from 'react';
 
 import InputComponent from '../../component/InputComponent';
 import ContactComponent from '../../component/ContactComponent';
@@ -21,23 +16,14 @@ import MainView from '../../component/MainView';
 import HeaderLogoComponent from '../../component/HeaderLogoComponent';
 
 import {AuthContext} from '../../Auth/AuthProvider';
-import getDBconnection from '../../Hooks/Sql/getDBconnection';
 
 const SignInScreen = ({navigation}) => {
   const [text, onChangeText] = useState('');
-
   const [password, onChangePassword] = useState('');
-  const [imei, setImei] = useState('');
-  const [showImeiInput, setShowImeiInput] = useState(false);
   const {login} = useContext(AuthContext);
 
   console.log(text, password);
-  useEffect(() => {
-    if (Platform.Version >= 29) {
-      setShowImeiInput(true);
-      // alert("as your phone run android version more that 9 please add imei number manually")
-    }
-  }, []);
+
 
   // const {createUser}=getDBconnection()
   // createUser ("pritam",'123')

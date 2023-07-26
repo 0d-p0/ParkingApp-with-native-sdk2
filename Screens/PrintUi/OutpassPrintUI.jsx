@@ -3,7 +3,7 @@ import React, { useContext, useEffect, useState } from 'react';
 import allColor from '../../Resources/Colors/Color';
 import CustomButtonComponent from '../../component/CustomButtonComponent';
 import CustomHeader from '../../component/CustomHeader';
- import ThermalPrinterModule from 'react-native-thermal-printer';
+import ThermalPrinterModule from 'react-native-thermal-printer';
 import vehicleINOUTController from '../../Hooks/Controller/receipt/vehicleINOUTController';
 import receiptDataBase from '../../Hooks/Sql/receipt/receiptDataBase';
 import { InternetStatusContext } from '../../App';
@@ -16,29 +16,45 @@ import getReceiptSettings from '../../Hooks/Controller/ReceiptSetting/getReceipt
 import ReceiptImageStorage from '../../Hooks/Sql/Receipt Setting Storage/ReceiptImageStorage';
 
 const OutpassPrintUI = ({ route, navigation }) => {
+  // Extract data and others from the route params  
   const { data, others } = route.params;
 
+  // helper Function to get Current user, which store in offline using SqlLite.
   const { getUserByToken } = storeUsers()
+  // this function return the token.which store in offline using Async storage
   const { retrieveAuthUser } = getAuthUser()
 
+  // State for managing Loading State
   const [loading, setLoading] = useState(false);
+  // State for manage picture/image 
+  // which we got from offline Store
   const [pic, setPic] = useState()
 
+  // receiptSetting it`s a state which holds receiptSettings
+  // Like Header1,Footer1 .....
   const { receiptSettings } = getReceiptSettings()
   // console.log('loppppppp--------------', others);
 
 
+  // this State holds is Internet Connectivity Available or Not
   const isOnline = useContext(InternetStatusContext);
 
 
+  // helper Function for upload Vehicles to the Server.
   const { handleVehicleout } = vehicleINOUTController();
+  // helper function for Get stored image.
   const { getReceiptImage } = ReceiptImageStorage()
-
+  // helper function for store vehicles Data stored offline.
   const { createOrUpdateVehicleInOut } = VehicleInOutStore()
 
+  //This State holds isBlueToothEnable enable or not.
   const [isBlueToothEnable, setIsBlueToothEnable] = useState(false)
+
+  // function to check isBlueToothEnable?
   async function checkBluetoothEnabled() {
     try {
+      // request for location Permissions
+      // it`s require to enable bluetooth.
       const granted = await PermissionsAndroid.request(
         PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION,
         {
@@ -64,6 +80,7 @@ const OutpassPrintUI = ({ route, navigation }) => {
         // const isEnabled = await BluetoothStatus.isEnabled();
         // console.log('Bluetooth Enabled:', isEnabled);
       } else {
+        // bluetooth is not enabled call this functions it`s self.
         checkBluetoothEnabled()
         console.log('Bluetooth permission denied');
       }
@@ -72,10 +89,13 @@ const OutpassPrintUI = ({ route, navigation }) => {
     }
   }
 
-
+  // run once only 
   useEffect(() => {
+    // Checking blutooh is enabled?
     checkBluetoothEnabled()
+    // Get the offline stored Image 
     getReceiptImage().then(response => {
+      // Store at pic State
       setPic(response.image)
     }).catch(error => {
       console.error(error)
@@ -84,30 +104,46 @@ const OutpassPrintUI = ({ route, navigation }) => {
 
 
   // console.log('ata[1].value - others[0].paid_amt', data);
-  const handlePrintReceipt = async () => {
 
+  // handle Receipt printing
+  const handlePrintReceipt = async () => {
+    // if bluetooth is not enabled.
+    // this return from here [*isBlueToothEnable]
     if (!isBlueToothEnable) {
       ToastAndroid.show('please enable the bluetooth first', ToastAndroid.SHORT);
+      // [*isBlueToothEnable]
       return
     }
 
+    //if loading state is true then it`s return from here [*loading]
+    // why i put this here?
+    // to prevent multiple call of this function.
     if (loading) {
+      //[*loading]
       return
     }
+    // set loading state to true
     setLoading(true)
 
     // await handleStoreOrUploadCarOut();
     // setLoading(false)
     // return
 
+    // if advance value is greater than the ZERO 
+    // then its call handleAdvancePrintReceipt()
+    // and return from here [*advance]
     if (others.advance != "0") {
       await handleAdvancePrintReceipt()
+      // [*advance]
       return
     }
 
+    // call this below function
     await handleStoreOrUploadCarOut();
 
     try {
+      // payload variable holds all the texts.
+      // Which will be printed.
       let payload = `[C]<font size='tall'><B>OUTPASS</font>\n`
 
       if (pic) {
@@ -120,8 +156,8 @@ const OutpassPrintUI = ({ route, navigation }) => {
         payload += `[c]${receiptSettings.header2}\n`
       }
 
-      payload +=`[C]<B><font size='big'>---------------</font>\n`+
-       `[L]<b>RECEIPT NO : ${data[0].value}\n` +
+      payload += `[C]<B><font size='big'>---------------</font>\n` +
+        `[L]<b>RECEIPT NO : ${data[0].value}\n` +
         `[L]<b>PARKING FEES : ${data[1].value}\n` +
         `[L]<b>VEHICLE TYPE : ${data[2].value}\n` +
         `[L]<b>VEHICLE NO : ${data[3].value}\n` +
@@ -136,6 +172,8 @@ const OutpassPrintUI = ({ route, navigation }) => {
       if (receiptSettings.footer2_flag == "1") {
         payload += `[C]${receiptSettings.footer2} \n`
       }
+      // this function start the printing process.
+      // this is an external package.
       await ThermalPrinterModule.printBluetooth({
         payload: payload,
         printerNbrCharactersPerLine: 30,
@@ -152,28 +190,42 @@ const OutpassPrintUI = ({ route, navigation }) => {
       // alert(err.message);
       console.log(err.message);
     }
+
+    // After all, the process completed loading state set to false
     setLoading(false)
 
   };
 
 
+  //  this function handle printing when advance price is greater than zero
   const handleAdvancePrintReceipt = async () => {
+    // if bluetooth is not enabled.
+    // this return from here [*isBlueToothEnable]
     if (!isBlueToothEnable) {
       ToastAndroid.show('please enable the bluetooth first', ToastAndroid.SHORT);
+      // [*isBlueToothEnable]
       return
     }
-
+    //if loading state is true then it`s return from here [*loading]
+    // why i put this here?
+    // to prevent multiple call of this function.
     if (loading) {
+      //[*loading]
       return
     }
+    // set loading state to true
     setLoading(true)
+    // call this below function
     await handleStoreOrUploadCarOut();
     // setLoading(false)
     // return
     try {
+      // payload variable holds all the texts.
+      // Which will be printed.
       let payload = `[C]<font size='tall'><B>OUTPASS</font>\n`
+
       if (pic) {
-        payload += `[R]<img>${pic}</img>\n\n`+'\n'
+        payload += `[R]<img>${pic}</img>\n\n` + '\n'
       }
       if (receiptSettings.header1_flag == "1") {
         payload += `[C]<font size='tall'> ${receiptSettings.header1}</font>\n`
@@ -200,6 +252,8 @@ const OutpassPrintUI = ({ route, navigation }) => {
       if (receiptSettings.footer2_flag == "1") {
         payload += `[C]${receiptSettings.footer2} \n`
       }
+      // this function start the printing
+      // this is an external package
       await ThermalPrinterModule.printBluetooth({
         payload: payload
         ,
@@ -221,21 +275,22 @@ const OutpassPrintUI = ({ route, navigation }) => {
   };
 
 
+  // It`s handle the upload and offline storing of vehicle data.
   const handleStoreOrUploadCarOut = async () => {
-    // ToastAndroid.showWithGravity(
-    //   'All Your Base Are Belong To Us',
-    //   ToastAndroid.SHORT,
-    //   ToastAndroid.CENTER,
-    // );
 
-
+    // store return data into token variable
     const token = await retrieveAuthUser();
+    // store return data into user variable
     const user = await getUserByToken(token);
+    // store return data into mc_srl_no_out variable
     const mc_srl_no_out = DeviceInfo.getSerialNumberSync();
 
 
+    // crete a blanck data array
+    // which holds the vehicle data
+    // for Uploading to the server
     const data2 = [];
-    // for not advanced mode
+    // push data into data2 array for not advanced mode
     if (others.advance == "0") {
       data2.push({
         receiptNo: data?.[0]?.value,
@@ -254,7 +309,7 @@ const OutpassPrintUI = ({ route, navigation }) => {
       })
     }
 
-    // for  advanced mode
+    //push data into data2 array for  advanced mode
     if (others.advance != "0") {
       data2.push({
         receiptNo: data?.[0]?.value,
@@ -276,6 +331,8 @@ const OutpassPrintUI = ({ route, navigation }) => {
     console.log("----------------------data 2 -----------------------", data2)
     // setLoading(false)
     // return
+
+    // if no internet connection then its store data localy
     if (!isOnline) {
       await createOrUpdateVehicleInOut(
         others.receiptNo, others.vehicleType, others.vehicle_id, others.receipt_type,
@@ -286,11 +343,16 @@ const OutpassPrintUI = ({ route, navigation }) => {
         ToastAndroid.LONG,
         ToastAndroid.CENTER,
       );
+      // navigate to previous screen
       navigation.navigate('bottomNavBAr');
       return;
     }
 
+    // if internet connection is available then 
+    // call handleVehicleout() 
+    // and store return data to res variable
     const res = await handleVehicleout(data2);
+    // if status not equal to 200 run below block
     if (res.status != 200) {
       ToastAndroid.showWithGravity(
         'car out data store in offfline server error',
@@ -305,6 +367,8 @@ const OutpassPrintUI = ({ route, navigation }) => {
     }
 
     console.log("outpass data", res.data)
+
+    // if status not equal to 200 run below block
     if (res.status == 200) {
       createOrUpdateVehicleInOut(
         others.receiptNo, others.vehicleType, others.vehicle_id, others.receipt_type,
@@ -316,12 +380,17 @@ const OutpassPrintUI = ({ route, navigation }) => {
         ToastAndroid.CENTER,
       );
     }
+    // navigate to previous screen
     navigation.navigate('bottomNavBAr');
+
+    //  if you wonder why we are call createOrUpdateVehicleInOut() for status 200 and not equal 200
+    //Although createOrUpdateVehicleInOut () requires a lot of arguments, there is a call for isUploadedOut that can be either true or false.
+    // this help us in future to upload data to the server. which are not uploaded due to no internet connectivity.
   };
 
   return (
     <>
-
+      {/* if loading state is true render loading */}
       {loading && (
         <View
           style={{
@@ -336,8 +405,10 @@ const OutpassPrintUI = ({ route, navigation }) => {
           <Text>Loading...</Text>
         </View>
       )}
-
+      {/* render custom header */}
       <CustomHeader title={'Printer Preview'} />
+
+      {/* render printer preview and action buttons */}
       <View style={{ padding: PixelRatio.roundToNearestPixel(15) }}>
         {/* data  loop run below */}
         {data &&
@@ -356,12 +427,14 @@ const OutpassPrintUI = ({ route, navigation }) => {
             </View>
           ))}
 
+        {/* render action buttons */}
         <View
           style={{
             flexDirection: 'row',
             justifyContent: 'space-between',
             marginTop: PixelRatio.roundToNearestPixel(10),
           }}>
+          {/* render goback button */}
           <CustomButtonComponent.CancelButton
             title={'Cancel'}
             onAction={() => {
@@ -370,6 +443,7 @@ const OutpassPrintUI = ({ route, navigation }) => {
             style={{ flex: 1, marginRight: PixelRatio.roundToNearestPixel(8) }}
           />
 
+          {/*  render printing button */}
           <CustomButtonComponent.GoButton
             title={'Print Receipt'}
             onAction={() => {

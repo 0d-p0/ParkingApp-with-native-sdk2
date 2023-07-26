@@ -27,16 +27,22 @@ const data = [
 ];
 const width = Dimensions.get("screen").width
 const Unbilled = ({ navigation }) => {
+    // NativeModules.MyPrinter is a reference to a native module named MyPrinter.  
     const MyModules = NativeModules.MyPrinter;
     const { retrieveAuthUser } = getAuthUser()
 
     const { getAllUnbilledRecords } = VehicleInOutStore()
     // GET LOGO
+    // HOOKS help us to get local stored image
     const { getReceiptImage } = ReceiptImageStorage()
+    // State for manage the  picture/logo/image
     const [pic, setPic] = useState()
-    const [unbilledData, setUnbilledData] = useState()
-    const [loading, setLoading] = useState()
+    // State for manage the From date 
 
+    const [unbilledData, setUnbilledData] = useState()
+    // State for manage the  loading values 
+    const [loading, setLoading] = useState()
+    // State for manage the  loading values 
     const [pl, setpl] = useState(false)
     const date = new Date()
 
@@ -45,10 +51,12 @@ const Unbilled = ({ navigation }) => {
     const [fDate, setFDate] = useState()
 
     const [showGenerate, setShowGenerate] = useState(false)
+    // State for manage the From date 
 
     const [mydateFrom, setDateFrom] = useState(new Date());
     const [displaymodeFrom, setModeFrom] = useState('date');
     const [isDisplayDateFrom, setShowFrom] = useState(false);
+    // handle change From date
 
     const changeSelectedDateFrom = (event, selectedDate) => {
         const currentDate = selectedDate || mydateFrom;
@@ -62,7 +70,7 @@ const Unbilled = ({ navigation }) => {
     const [mydateTo, setDateTo] = useState(new Date());
     const [displaymodeTo, setModeTo] = useState('date');
     const [isDisplayDateTo, setShowTo] = useState(false);
-
+    // handle change to date
     const changeSelectedDateTo = (event, selectedDate) => {
         const currentDate = selectedDate || mydateTo;
         setDateTo(currentDate);
@@ -101,6 +109,9 @@ const Unbilled = ({ navigation }) => {
 
 
 
+    // handle add Spaces between texts
+    // these are some special spaces
+    // because printer ignore the normal spaces
     function addSpecialSpaces(inputString) {
         // Regular expression to match spaces using lookahead assertion
         const regex = /(?=\s)/g;
@@ -110,6 +121,7 @@ const Unbilled = ({ navigation }) => {
 
         return result;
     }
+    // handle printing of Unbilled report
 
     const handleUnbilledPrint = async () => {
         const options = {
@@ -136,6 +148,7 @@ const Unbilled = ({ navigation }) => {
         if (receiptSettings.header2_flag == "1") {
             headerPayload += `${receiptSettings.header2}\n`
         }
+        // Printing Header uisng ZCS sdk
 
         MyModules.printHeader(headerPayload, 24, (err, msg) => {
             if (err) {
@@ -145,6 +158,7 @@ const Unbilled = ({ navigation }) => {
         })
 
         if (pic) {
+            // Printing picture uisng ZCS sdk
             const picData = pic.split('data:image/jpeg;base64,')
             MyModules.printImage(picData[1], (err, msg) => {
                 if (err) {
@@ -178,6 +192,7 @@ const Unbilled = ({ navigation }) => {
         const mainPayLoad = addSpecialSpaces(payload)
         // console.log(mainPayLoad)
         try {
+            // Printing Bill uisng ZCS sdk
             MyModules.printBill(mainPayLoad, 18, false, (err, msg) => {
                 if (err) {
                     console.error(err)
@@ -185,6 +200,7 @@ const Unbilled = ({ navigation }) => {
                 }
                 console.log(msg)
             })
+            // Printing footer uisng ZCS sdk
             MyModules.printFooter(footerPayload, 20, (err, msg) => {
                 if (err) {
                     console.error(err)
@@ -229,12 +245,13 @@ const Unbilled = ({ navigation }) => {
     }, [mydateTo, mydateFrom])
 
     useEffect(() => {
+        // all the functions are call when mydateTo, mydateFrom values are changed
         getReceiptImage().then(res => setPic(res.image)).catch(error => console.error(error))
     }, [])
 
 
     return (
-
+        // get stored image and store is pic state.
         <View style={{ flex: 1 }}>
             <CustomHeader title={"Unbilled Receipts"} navigation={navigation} />
             {isDisplayDateFrom && <DateTimePicker

@@ -44,22 +44,21 @@ const CreateReceipt = ({ navigation, route }) => {
 
   const { generalSetting } = useContext(AuthContext);
 
-  //  destructureing dev_mod from generalSetting
+  //Destructuring dev_mod, max_receipt, and adv_pay from generalSetting. 
   const { dev_mod, max_receipt, adv_pay } = generalSetting;
 
 
-  // dev_mod = "A"
-
-  // get vehicle rates by vehicleID
+  // hooks that handle  vehicle rates by vehicleID
   const { getVehicleRatesByVehicleId } = vehicleRatesStorage();
+  // hooks that  handle vehicle rates by vehicleID
   const { getAdvancePricesByVehicleId } = advancePriceStorage()
 
   const { createVehicleInOut } = VehicleInOutStore()
 
-  // RECEIPT SETTINGS
+  // this state store RECEIPT SETTINGS 
   const { receiptSettings } = getReceiptSettings()
 
-  // GET LOGO
+  // hooks handle to get the LOGO from local storage
   const { getReceiptImage } = ReceiptImageStorage()
 
 
@@ -67,10 +66,10 @@ const CreateReceipt = ({ navigation, route }) => {
   const [vehicleNumber, setVehicleNumber] = useState('');
   const [READ_PHONE_STATE, setREAD_PHONE_STATE] = useState(false);
 
-  // setter and getter current time
+  // The currentTime state variable is initialized using the useState hook to hold the current date and time.
   const [currentTime, setCurrentTime] = useState(new Date());
 
-  //  date time set options
+  //  The day, month, year, hour, minute, and formattedDateTime variables are created. These are used to format the date and time in a specific format.
   const day = String(currentTime.getDate()).padStart(2, '0');
   const month = String(currentTime.getMonth() + 1).padStart(2, '0');
   const year = String(currentTime.getFullYear()).slice(-2);
@@ -87,10 +86,13 @@ const CreateReceipt = ({ navigation, route }) => {
   // const { ding } = playSound()
 
   // get data from previous screen
+  // Data is extracted from the route.params, including type, id, userId, operatorName, and currentDayTotalReceipt.
   const { type, id, userId, operatorName, currentDayTotalReceipt } = route.params;
 
+  //This State holds isBlueToothEnable enable or not.
 
   const [isBlueToothEnable, setIsBlueToothEnable] = useState(false)
+  // function to check isBlueToothEnable?
   async function checkBluetoothEnabled() {
     try {
       const granted = await PermissionsAndroid.request(
@@ -118,6 +120,7 @@ const CreateReceipt = ({ navigation, route }) => {
         // const isEnabled = await BluetoothStatus.isEnabled();
         // console.log('Bluetooth Enabled:', isEnabled);
       } else {
+        // if bluetooth is not enabled call this functions it`s self.
         checkBluetoothEnabled()
         console.log('Bluetooth permission denied');
       }
@@ -127,7 +130,7 @@ const CreateReceipt = ({ navigation, route }) => {
   }
 
 
-
+  // check READ_PHONE_STATE available or not 
   const isPermitted = async () => {
     try {
       const granted = await PermissionsAndroid.request(
@@ -164,6 +167,7 @@ const CreateReceipt = ({ navigation, route }) => {
 
   // Handle offline car in
   const handelOfflineCarIN = async () => {
+    // TODO if max_receipt reached return from here
     // if (currentDayTotalReceipt > max_receipt) {
     //   return ToastAndroid.showWithGravityAndOffset(
     //      'Today maximum Receipt reached ',
@@ -175,14 +179,18 @@ const CreateReceipt = ({ navigation, route }) => {
 
     //  }
 
+    // if bluetooth not enabled then return fro here
     if (!isBlueToothEnable) {
       ToastAndroid.show('please enable the bluetooth first', ToastAndroid.SHORT);
       return
     }
+    // receiptNo holds the return value of currentReceiptNo
     const receiptNo = await currentReceiptNo();
+    // mc_srl_no holds serial number
     const mc_srl_no = DeviceInfo.getSerialNumberSync();
 
     try {
+      // if READ_PHONE_STATE is not available then request for permission.
       if (!READ_PHONE_STATE) {
         Alert.alert(
           'Phone State Permission',
@@ -192,23 +200,27 @@ const CreateReceipt = ({ navigation, route }) => {
               text: 'Cancel',
               style: 'cancel',
             },
+
             { text: 'OK', onPress: isPermitted },
           ],
         );
         return;
       }
 
+      // if not online run below block 
       if (!isOnline) {
-        // const createData = ;
-        // const increaseNO = ;
 
+        //store new vehicle data using createVehicleInOut() 
+        //increaseReceiptNo by 1 
+        // generate print using  handlePrintReceipt()
         await Promise.all([createVehicleInOut(receiptNo, type, id, "S", vehicleNumber.toUpperCase(), currentTime.toISOString(), dev_mod, operatorName, userId, mc_srl_no, 0, "Y", 0, false), increaseReceiptNo(receiptNo),
         handlePrintReceipt(receiptNo, mc_srl_no, true)
         ])
-
+        //  and return from here no internet connectivity
         return
       };
-
+      // init InData with important values
+      // which are mandatory for uploading data to the server
       const InData = [
         {
           receiptNo: receiptNo,
@@ -222,9 +234,10 @@ const CreateReceipt = ({ navigation, route }) => {
         },
       ];
 
+      // store handleVehicleIn() return values in response
       const response = await handleVehicleIn(InData);
-
       if (response.status === 200) {
+        // if status  equal to 200 run below block
         await Promise.all([createVehicleInOut(receiptNo, type, id, "S", vehicleNumber.toUpperCase(), currentTime.toISOString(), dev_mod, operatorName, userId, mc_srl_no, 0, "Y", 0, true), increaseReceiptNo(receiptNo), handlePrintReceipt(receiptNo, mc_srl_no, true)])
 
         ToastAndroid.showWithGravity(
@@ -233,10 +246,14 @@ const CreateReceipt = ({ navigation, route }) => {
           ToastAndroid.CENTER,
         );
       } else {
+        // if status not equal to 200 run below block
         await Promise.all([createVehicleInOut(receiptNo, type, id, "S", vehicleNumber.toUpperCase(), currentTime.toISOString(), dev_mod, operatorName, userId, mc_srl_no, 0, "Y", 0, false), increaseReceiptNo(receiptNo), handlePrintReceipt(receiptNo, mc_srl_no, false)])
       }
 
 
+      //  if you wonder why we are call createOrUpdateVehicleInOut() for status 200 and not equal 200
+      //Although createOrUpdateVehicleInOut () requires a lot of arguments, there is a call for isUploadedIn that can be either true or false.
+      // this help us in future to upload data to the server. which are not uploaded due to no internet connectivity.
     } catch (error) {
       console.error(error.message);
     }
@@ -255,18 +272,26 @@ const CreateReceipt = ({ navigation, route }) => {
     //    )
 
     //  }
+
+    // if bluetooth not enabled then return fro here
+
     if (!isBlueToothEnable) {
       ToastAndroid.show('please enable the bluetooth first', ToastAndroid.SHORT);
       return
     }
+    // store advance price in advancePrice variable
     const advancePrice = await getAdvancePricesByVehicleId(id);
     console.log(" loopp p ", advancePrice)
+    // receiptNo holds the return value of currentReceiptNo
     const receiptNo = await currentReceiptNo();
+    // mc_srl_no holds serial number
+
     const mc_srl_no = DeviceInfo.getSerialNumberSync();
     // [{"advance_amount": "50.00", "advance_id": "2", "id": 2, "subclient_id": "1", "vehicle_id": "1"}]
     console.log("advance price is = ", advancePrice)
 
     try {
+      // if READ_PHONE_STATE is not available then request for permission.
       if (!READ_PHONE_STATE) {
         Alert.alert(
           'Phone State Permission',
@@ -283,14 +308,18 @@ const CreateReceipt = ({ navigation, route }) => {
       }
 
       if (!isOnline) {
-        // const createData = ;
-        // const increaseNO = ;
+
+        //store new vehicle data using createVehicleInOut() 
+        //increaseReceiptNo by 1 
+        // generate print using  handlePrintReceipt()
         await Promise.all([createVehicleInOut(receiptNo, type, id, "S", vehicleNumber.toUpperCase(), currentTime.toISOString(), dev_mod, operatorName, userId, mc_srl_no, 0, "Y", advancePrice[0].advance_amount, false), increaseReceiptNo(receiptNo),
         handleAdvancePrintReceipt(receiptNo, advancePrice[0].advance_amount, mc_srl_no, false)
         ])
+        //  and return from here no internet connectivity
         return
       };
-
+      // init InData with important values
+      // which are mandatory for uploading data to the server
       const InData = [
         {
           receiptNo: receiptNo,
@@ -310,11 +339,13 @@ const CreateReceipt = ({ navigation, route }) => {
       // upload to the server
 
 
+      // store handleVehicleIn() return values in response
       const response = await handleVehicleIn(InData);
 
       console.log(response)
 
       if (response.status === 200) {
+        // if status  equal to 200 run below block
         // STORE,INCREASE RECEIPT NO and HANDLE PRINTOUT
         await Promise.all([createVehicleInOut(receiptNo, type, id, "S", vehicleNumber.toUpperCase(), currentTime.toISOString(), dev_mod, operatorName, userId, mc_srl_no, 0, "Y", advancePrice[0].advance_amount, true), increaseReceiptNo(receiptNo), handleAdvancePrintReceipt(receiptNo, advancePrice[0].advance_amount, mc_srl_no, true)
         ])
@@ -325,12 +356,15 @@ const CreateReceipt = ({ navigation, route }) => {
           ToastAndroid.CENTER,
         );
       } else {
+        // if status not equal to 200 run below block
         // STORE,INCREASE RECEIPT NO and HANDLE PRINTOUT
         await Promise.all([createVehicleInOut(receiptNo, type, id, "S", vehicleNumber.toUpperCase(), currentTime.toISOString(), dev_mod, operatorName, userId, mc_srl_no, 0, "Y", advancePrice[0].advance_amount, false), increaseReceiptNo(receiptNo), handleAdvancePrintReceipt(receiptNo, advancePrice[0].advance_amount, mc_srl_no, false)
         ])
       }
 
-
+      //  if you wonder why we are call createOrUpdateVehicleInOut() for status 200 and not equal 200
+      //Although createOrUpdateVehicleInOut () requires a lot of arguments, there is a call for isUploadedIn that can be either true or false.
+      // this help us in future to upload data to the server. which are not uploaded due to no internet connectivity.
     } catch (error) {
       console.error(error.message);
     }
@@ -359,7 +393,7 @@ const CreateReceipt = ({ navigation, route }) => {
     try {
       let payload = `[C]<font size='tall'><B>RECEIPT</font>\n`
       if (pic) {
-        payload += `[R]<img>${pic}</img>\n\n`+'\n'
+        payload += `[R]<img>${pic}</img>\n\n` + '\n'
       }
       if (receiptSettings.header1_flag == "1") {
         payload += `[C]<font size='tall'> ${receiptSettings.header1}</font>\n`
@@ -405,7 +439,7 @@ const CreateReceipt = ({ navigation, route }) => {
 
       let payload = `[C]<font size='tall'><B>RECEIPT</font>\n`
       if (pic) {
-        payload += `[R]<img>${pic}</img>\n\n`+'\n'
+        payload += `[R]<img>${pic}</img>\n\n` + '\n'
       }
       if (receiptSettings.header1_flag == "1") {
         payload += `[C]<font size='tall'> ${receiptSettings.header1}</font>\n`
@@ -454,6 +488,7 @@ const CreateReceipt = ({ navigation, route }) => {
       return;
     }
     setLoading(true);
+    // if vehicleNumber is blank then return from the below block
     if (!vehicleNumber) {
       setLoading(false);
       return ToastAndroid.showWithGravity(
@@ -464,20 +499,27 @@ const CreateReceipt = ({ navigation, route }) => {
     }
 
     if (adv_pay == 'Y') {
+      // if adv_pay is equal to Y then  below function will work
+      // Y =  Yes , N = No
       await handelAdvanceOfflineCarIN()
     }
 
     if (adv_pay != 'Y') {
+      // if adv_pay is Not equal to Y then  below function will work
+      // Y =  Yes , N = No
       await handelOfflineCarIN()
     }
     setLoading(false);
     setVehicleNumber();
-    // setModalVisible(true);
+
+    // navigate to previous screen
     navigation.navigate('Receipt')
   };
 
   useEffect(() => {
+    // Get the offline stored Image 
     getReceiptImage().then(response => {
+      // Store at pic State
       setPic(response.image)
     }).catch(error => {
       console.error(error)
@@ -486,6 +528,8 @@ const CreateReceipt = ({ navigation, route }) => {
 
   return (
     <View>
+      {/* if loading state is true render loading */}
+
       {loading && (
         <View
           style={{
@@ -501,9 +545,9 @@ const CreateReceipt = ({ navigation, route }) => {
         </View>
       )}
 
-      {/* {dev_mod == 'A' ? <Text> Hello </Text> : ''} */}
 
       <ScrollView>
+        {/* render custom header */}
         <CustomHeader title={'RECEIPT'} navigation={navigation} />
         <View style={{ padding: PixelRatio.roundToNearestPixel(30) }}>
           {/* current time and date */}
@@ -597,6 +641,8 @@ const CreateReceipt = ({ navigation, route }) => {
               marginTop: normalize(10),
               marginHorizontal: normalize(10),
             }}>
+
+            {/* GOBACK action button */}
             <CustomButtonComponent.CancelButton
               title={'Cancel'}
               onAction={() => {
@@ -605,6 +651,7 @@ const CreateReceipt = ({ navigation, route }) => {
               style={{ flex: 1, marginRight: normalize(8) }}
             />
 
+            {/* Print Receipt Action Button */}
             <CustomButtonComponent.GoButton
               title={'Print Receipt'}
               onAction={() => handleCreateReceipt()}

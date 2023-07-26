@@ -16,32 +16,41 @@ import ReceiptImageStorage from '../../Hooks/Sql/Receipt Setting Storage/Receipt
 import VehicleInOutStore from '../../Hooks/Sql/VehicleInOut/VehicleInOutStore';
 
 const CarReports = ({ navigation }) => {
+    // NativeModules.MyPrinter is a reference to a native module named MyPrinter.   
     const MyModules = NativeModules.MyPrinter;
+    // State for manage the  total price
     const [totalPrice, setTotalPrice] = useState(0)
+    // State for manage the  total quantity
     const [totalQTY, setTotalQTY] = useState(0)
+    // State for manage the  total Advance Price
     const [totalAdvance, setTotalAdvance] = useState(0)
-    const { retrieveAuthUser } = getAuthUser()
 
+    // State for manage the unBilled Data
     const [unbilledData, setUnbilledData] = useState()
+    // State for manage the  loading values 
     const [loading, setLoading] = useState()
 
+    // State for preventing multiple button press
     const [pl, setpl] = useState(false)
+    // create a new Date object
     const date = new Date()
-    // GET LOGO
+
+    // HOOKS help us to get local stored image
     const { getReceiptImage } = ReceiptImageStorage()
+    // State for manage the  picture/logo/image
     const [pic, setPic] = useState()
+    // this state manage the receipt Settings
     const { receiptSettings } = getReceiptSettings()
 
-    const [fDate, setFDate] = useState()
-
+    // State for manage the From date 
     const [mydateFrom, setDateFrom] = useState(new Date());
     const [displaymodeFrom, setModeFrom] = useState('date');
     const [isDisplayDateFrom, setShowFrom] = useState(false);
 
+    // handle change From date
     const changeSelectedDateFrom = (event, selectedDate) => {
         const currentDate = selectedDate || mydateFrom;
         setDateFrom(currentDate);
-        setFDate(selectedDate)
         setShowFrom(false)
         setShowFrom(false)
 
@@ -50,7 +59,7 @@ const CarReports = ({ navigation }) => {
     const [mydateTo, setDateTo] = useState(new Date());
     const [displaymodeTo, setModeTo] = useState('date');
     const [isDisplayDateTo, setShowTo] = useState(false);
-
+    // handle change to date
     const changeSelectedDateTo = (event, selectedDate) => {
         const currentDate = selectedDate || mydateTo;
         setDateTo(currentDate);
@@ -59,32 +68,10 @@ const CarReports = ({ navigation }) => {
         // getUnbilledReport(selectedDate)
     };
 
-    const getUnbilledReport = async (tDate) => {
-        return
-        setLoading(true)
-        const token = await retrieveAuthUser()
-        console.log(console.log(mydateFrom, " ------------", mydateTo))
 
-        axios.get(`https://parking.opentech4u.co.in/api/parking/unbilled3?fDate=${mydateFrom.toISOString()}&tDate=${mydateTo.toISOString()}`, {
-            headers: { Authorization: `Bearer ${token}` },
-        }).then((res) => {
-            setUnbilledData(res?.data?.data)
-
-            const totalAmount = res?.data?.data.reduce((sum, obj) => {
-                const amount = parseFloat(obj.total_amount);
-                return sum + amount;
-            }, 0);
-            setTotalPrice(totalAmount)
-
-            setLoading(false)
-            console.log("-----------------unbuiled data -----------", res.data.data)
-
-        }).catch(error => {
-            console.error(error)
-            setLoading(false)
-        })
-    }
-
+    // handle add Spaces between texts
+    // these are some special spaces
+    // because printer ignore the normal spaces
     function addSpecialSpaces(inputString) {
         // Regular expression to match spaces using lookahead assertion
         const regex = /(?=\s)/g;
@@ -95,7 +82,7 @@ const CarReports = ({ navigation }) => {
         return result;
     }
 
-    console.log(unbilledData)
+    // handle printing of Veicle report
     const handleUnbilledPrint = async () => {
 
         const options = {
@@ -121,6 +108,7 @@ const CarReports = ({ navigation }) => {
             headerPayload += `${receiptSettings.header2}\n`
         }
 
+        // Printing Header uisng ZCS sdk
         MyModules.printHeader(headerPayload, 24, (err, msg) => {
             if (err) {
                 console.error(err)
@@ -130,6 +118,7 @@ const CarReports = ({ navigation }) => {
 
         if (pic) {
             const picData = pic.split('data:image/jpeg;base64,')
+            // Printing picture uisng ZCS sdk
             MyModules.printImage(picData[1], (err, msg) => {
                 if (err) {
                     console.error(err)
@@ -167,6 +156,8 @@ const CarReports = ({ navigation }) => {
         const mainPayLoad = addSpecialSpaces(payload)
         // console.log(mainPayLoad)
         try {
+            // Printing Bill uisng ZCS sdk
+
             MyModules.printBill(mainPayLoad, 18, false, (err, msg) => {
                 if (err) {
                     console.error(err)
@@ -174,6 +165,8 @@ const CarReports = ({ navigation }) => {
                 }
                 console.log(msg)
             })
+            // Printing footer uisng ZCS sdk
+
             MyModules.printFooter(footerPayload, 20, (err, msg) => {
                 if (err) {
                     console.error(err)
@@ -191,7 +184,7 @@ const CarReports = ({ navigation }) => {
         }
     }
 
-
+    // getVehicleWiseReports() return list of vihicle
     const { getVehicleWiseReports } = VehicleInOutStore()
     const [showGenerate, setShowGenerate] = useState(false)
     const [value, setValue] = useState(0)
@@ -229,19 +222,25 @@ const CarReports = ({ navigation }) => {
             })
     }
     useEffect(() => {
+        // all the functions are call when mydateTo, mydateFrom values are changed
         setValue(value + 1)
         if (value != 0) {
             setShowGenerate(true)
         }
         handleGenerateReport()
     }, [mydateTo, mydateFrom])
+
+    // run only once time
     useEffect(() => {
+        // get stored image and store is pic state.
         getReceiptImage().then(res => setPic(res.image)).catch(error => console.error(error))
     }, [])
 
     return (
         <View style={{ flex: 1 }}>
+            {/* render custom Header */}
             <CustomHeader title={"Vehicle Wise Reports"} navigation={navigation} />
+            {/* render from date picker */}
             {isDisplayDateFrom && <DateTimePicker
                 testID="dateTimePicker"
                 value={mydateFrom}
@@ -252,6 +251,7 @@ const CarReports = ({ navigation }) => {
             />
             }
 
+            {/* render to date picker */}
             {isDisplayDateTo && <DateTimePicker
                 testID="dateTimePicker"
                 value={mydateTo}
@@ -341,8 +341,12 @@ const CarReports = ({ navigation }) => {
                 </View>}
                 {/* back and print action button */}
                 <View style={styles.actionButton}>
+                    {/* Generate Button */}
                     {showGenerate && <CustomButtonComponent.GoButton title={"Generate Report"} style={{ flex: 1, marginLeft: 10 }} onAction={() => handleGenerateReport()} />}
+                    {/* Back Button */}
+
                     {<CustomButtonComponent.CancelButton title={"Back"} style={{ flex: 1, marginRight: 10 }} onAction={() => navigation.goBack()} />}
+                    {/* Print Button */}
                     {unbilledData && <CustomButtonComponent.GoButton title={"Print Report"} style={{ flex: 1, marginLeft: 10 }} onAction={() => handleUnbilledPrint()} />}
                 </View>
             </View>

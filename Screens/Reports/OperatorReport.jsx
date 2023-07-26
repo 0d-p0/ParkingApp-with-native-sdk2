@@ -15,26 +15,37 @@ import ReceiptImageStorage from '../../Hooks/Sql/Receipt Setting Storage/Receipt
 const width = Dimensions.get("screen").width
 
 const OperatorReport = ({ navigation }) => {
+     // NativeModules.MyPrinter is a reference to a native module named MyPrinter.  
     const MyModules = NativeModules.MyPrinter;
+        // State for manage the  total price
+
     const [totalPrice, setTotalPrice] = useState(0)
+      // State for manage the  total quantity
     const [totalQTY, setTotalQTY] = useState(0)
+      // State for manage the  total Advance Price
     const [totalAdvance, setTotalAdvance] = useState(0)
-
+   // State for manage the unBilled Data
     const [unbilledData, setUnbilledData] = useState()
+        // State for manage the  loading values 
     const [loading, setLoading] = useState()
-
+   // State for preventing multiple button press
     const [pl, setpl] = useState(false)
     const date = new Date()
     // GET LOGO
+    
+    // HOOKS help us to get local stored image
     const { getReceiptImage } = ReceiptImageStorage()
+        // State for manage the  picture/logo/image
     const [pic, setPic] = useState()
     const { receiptSettings } = getReceiptSettings()
 
     const [fDate, setFDate] = useState()
+    // State for manage the From date 
 
     const [mydateFrom, setDateFrom] = useState(new Date());
     const [displaymodeFrom, setModeFrom] = useState('date');
     const [isDisplayDateFrom, setShowFrom] = useState(false);
+    // handle change From date
 
     const changeSelectedDateFrom = (event, selectedDate) => {
         const currentDate = selectedDate || mydateFrom;
@@ -48,7 +59,7 @@ const OperatorReport = ({ navigation }) => {
     const [mydateTo, setDateTo] = useState(new Date());
     const [displaymodeTo, setModeTo] = useState('date');
     const [isDisplayDateTo, setShowTo] = useState(false);
-
+    // handle change to date
     const changeSelectedDateTo = (event, selectedDate) => {
         const currentDate = selectedDate || mydateTo;
         setDateTo(currentDate);
@@ -62,6 +73,9 @@ const OperatorReport = ({ navigation }) => {
     const [showGenerate, setShowGenerate] = useState(false)
     const [value, setValue] = useState(0)
 
+    // handle add Spaces between texts
+    // these are some special spaces
+    // because printer ignore the normal spaces
     function addSpecialSpaces(inputString) {
         // Regular expression to match spaces using lookahead assertion
         const regex = /(?=\s)/g;
@@ -71,7 +85,7 @@ const OperatorReport = ({ navigation }) => {
 
         return result;
     }
-
+    // handle printing of operator report
     const handleUnbilledPrint = async () => {
         const options = {
             hour12: false,
@@ -96,6 +110,7 @@ const OperatorReport = ({ navigation }) => {
         if (receiptSettings.header2_flag == "1") {
             headerPayload += `${receiptSettings.header2}\n`
         }
+        // Printing Header uisng ZCS sdk
 
         MyModules.printHeader(headerPayload, 24, (err, msg) => {
             if (err) {
@@ -105,6 +120,7 @@ const OperatorReport = ({ navigation }) => {
         })
 
         if (pic) {
+                   // Printing picture uisng ZCS sdk
             const picData = pic.split('data:image/jpeg;base64,')
             MyModules.printImage(picData[1], (err, msg) => {
                 if (err) {
@@ -138,6 +154,7 @@ const OperatorReport = ({ navigation }) => {
 
         const mainPayLoad = addSpecialSpaces(payload)
         try {
+             // Printing Bill uisng ZCS sdk
             MyModules.printBill(mainPayLoad, 18, false, (err, msg) => {
                 if (err) {
                     console.error(err)
@@ -145,6 +162,7 @@ const OperatorReport = ({ navigation }) => {
                 }
                 console.log(msg)
             })
+            // Printing footer uisng ZCS sdk
             MyModules.printFooter(footerPayload, 20, (err, msg) => {
                 if (err) {
                     console.error(err)
@@ -196,6 +214,7 @@ const OperatorReport = ({ navigation }) => {
             })
     }
     useEffect(() => {
+           // all the functions are call when mydateTo, mydateFrom values are changed
         setValue(value + 1)
         if (value != 0) {
             setShowGenerate(true)
@@ -204,6 +223,7 @@ const OperatorReport = ({ navigation }) => {
     }, [mydateTo, mydateFrom])
 
     useEffect(() => {
+         // get stored image and store is pic state.
         getReceiptImage().then(res => setPic(res.image)).catch(error => console.error(error))
     }, [])
 

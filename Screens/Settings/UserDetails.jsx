@@ -36,11 +36,13 @@ const UserDetails = ({navigation}) => {
 
   return (
     <>
+    {/* render Header */}
       <CustomHeader title={'User Info'} navigation={navigation} />
 
       <View style={styles.container}>
         <View style={styles.card}>
           <View style={styles.cardHeader}>
+      
             <Text style={styles.cardHeaderText}>User Details</Text>
           </View>
           <View style={styles.cardBody}>

@@ -53,6 +53,7 @@ const CreateReceipt = ({ navigation, route }) => {
   // hooks that  handle vehicle rates by vehicleID
   const { getAdvancePricesByVehicleId } = advancePriceStorage()
 
+  // function handle offline storage
   const { createVehicleInOut } = VehicleInOutStore()
 
   // this state store RECEIPT SETTINGS 
@@ -426,7 +427,8 @@ const CreateReceipt = ({ navigation, route }) => {
     } catch (err) {
       //error handling
       //
-      ToastAndroid.show('hello error', ToastAndroid.SHORT);
+      // alert(JSON.stringify(err.message))
+      ToastAndroid.show('Print error', ToastAndroid.SHORT);
       console.log(err.message);
     }
   };

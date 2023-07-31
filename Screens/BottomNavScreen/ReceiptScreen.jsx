@@ -69,6 +69,7 @@ const ReceiptScreen = ({ navigation }) => {
   const { getVehicleRatesByVehicleId } = vehicleRatesStorage()
   // const { handleGetReceiptSettings } = 
   const [userDetails, setUserDetails] = useState();
+  
   // const { ding } = playSound()
   const [isBlueToothEnable, setIsBlueToothEnable] = useState(false)
   async function checkBluetoothEnabled() {

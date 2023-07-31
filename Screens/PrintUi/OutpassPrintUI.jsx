@@ -141,6 +141,7 @@ const OutpassPrintUI = ({ route, navigation }) => {
     // call this below function
     await handleStoreOrUploadCarOut();
 
+
     try {
       // payload variable holds all the texts.
       // Which will be printed.
@@ -294,7 +295,7 @@ const OutpassPrintUI = ({ route, navigation }) => {
         date_time_in: others.date_time_in,
         oprn_mode: others.oprn_mode,
         vehicle_id: others.vehicle_id,
-        vehicle_no: data?.value,
+        vehicle_no: others?.vehicle_no,
         receipt_type: 'S',
         date_time_out: others?.date_time_out,
         user_id_out: others?.userId || user?.id,
@@ -313,7 +314,7 @@ const OutpassPrintUI = ({ route, navigation }) => {
         date_time_in: others?.date_time_in,
         oprn_mode: "A",
         vehicle_id: others.vehicle_id,
-        vehicle_no: data[5].value,
+        vehicle_no: others.vehicle_no,
         receipt_type: 'S',
         date_time_out: others?.date_time_out,
         user_id_out: others.userId || user?.id,
@@ -325,7 +326,7 @@ const OutpassPrintUI = ({ route, navigation }) => {
         mc_srl_no: others.mc_srl_no
       })
     }
-    console.log("----------------------data 2 -----------------------", data2)
+    console.log("----------------------data 2 -----------------------",data2)
     // setLoading(false)
     // return
 

@@ -7,7 +7,7 @@ function storeUsers() {
     const db = await getDatabaseConnection();
     db.transaction(tx => {
       tx.executeSql(
-        'CREATE TABLE IF NOT EXISTS userDataTable(id BIGINT(20) NOT NULL PRIMARY KEY, name VARCHAR(255)  NULL, user_id VARCHAR(255)  NULL UNIQUE, short_name VARCHAR(255)  NULL ,imei_no VARCHAR(255)  NULL,client_id VARCHAR(255)  NULL,client_type_flag VARCHAR(255)  NULL,allow_flag VARCHAR(255)  NULL,stPassword VARCHAR(255)  NULL,mc_sl_no VARCHAR(255)  NULL,purchase_date VARCHAR(255)  NULL,sub_client_id VARCHAR(255)  NULL,registration_flag VARCHAR(255)  NULL,location_id VARCHAR(255)  NULL  , role VARCHAR(10)  NULL, otp INT(7)  NULL, otp_status  VARCHAR(255)   NULL,email_verified_at TIMESTAMP NULL,  password VARCHAR(255)  NULL, remember_token VARCHAR(100) NULL, created_at TIMESTAMP NULL, updated_at TIMESTAMP NULL,location VARCHAR(255),companyname VARCHAR(255), token  VARCHAR(255) NULL)',
+        'CREATE TABLE IF NOT EXISTS userDataTable(id INTEGER PRIMARY KEY AUTOINCREMENT, name VARCHAR(255)  NULL, user_id VARCHAR(255)  NULL UNIQUE, short_name VARCHAR(255)  NULL ,imei_no VARCHAR(255)  NULL,client_id VARCHAR(255)  NULL,client_type_flag VARCHAR(255)  NULL,allow_flag VARCHAR(255)  NULL,stPassword VARCHAR(255)  NULL,mc_sl_no VARCHAR(255)  NULL,purchase_date VARCHAR(255)  NULL,sub_client_id VARCHAR(255)  NULL,registration_flag VARCHAR(255)  NULL,location_id VARCHAR(255)  NULL  , role VARCHAR(10)  NULL, otp INT(7)  NULL, otp_status  VARCHAR(255)   NULL,email_verified_at TIMESTAMP NULL,  password VARCHAR(255)  NULL, remember_token VARCHAR(100) NULL, created_at TIMESTAMP NULL, updated_at TIMESTAMP NULL,location VARCHAR(255),companyname VARCHAR(255), token  VARCHAR(255) NULL)',
         [],
         // () => console.log('user database  table created'),
         // error => console.error('Error creating table: ', error),
@@ -20,7 +20,6 @@ function storeUsers() {
     const db = await getDatabaseConnection();
     console.log("-----------------------------------",location,companyname)
     const {
-      id,
       name,
       user_id,
       short_name,
@@ -54,9 +53,8 @@ function storeUsers() {
       db.transaction(
         tx => {
           tx.executeSql(
-            'INSERT INTO userDataTable(id, name, user_id,short_name, imei_no ,client_id ,client_type_flag ,allow_flag ,stPassword ,mc_sl_no ,purchase_date ,sub_client_id ,registration_flag ,location_id, role, otp, otp_status,email_verified_at,password, remember_token, created_at,updated_at,location,companyname,token) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)',
+            'INSERT INTO userDataTable(name, user_id,short_name, imei_no ,client_id ,client_type_flag ,allow_flag ,stPassword ,mc_sl_no ,purchase_date ,sub_client_id ,registration_flag ,location_id, role, otp, otp_status,email_verified_at,password, remember_token, created_at,updated_at,location,companyname,token) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)',
             [
-              id,
               name,
               user_id,
               short_name,

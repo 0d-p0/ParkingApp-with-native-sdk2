@@ -1,4 +1,4 @@
-import { PixelRatio, Pressable, StyleSheet, Text, View, ScrollView, Dimensions, ActivityIndicator, Alert, NativeModules } from 'react-native'
+import { PixelRatio, Pressable, StyleSheet, Text, View, ScrollView, Dimensions, ActivityIndicator, Alert, NativeModules,ToastAndroid,PermissionsAndroid } from 'react-native'
 import React, { useCallback, useEffect, useState } from 'react'
 import ViewShot, { captureRef } from 'react-native-view-shot';
 
@@ -9,6 +9,8 @@ import CustomButtonComponent from '../../component/CustomButtonComponent'
 
 import DateTimePicker from '@react-native-community/datetimepicker';
 import axios from 'axios'
+import BleManager from 'react-native-ble-manager';
+
 import getAuthUser from '../../Hooks/getAuthUser'
 import ThermalPrinterModule from 'react-native-thermal-printer';
 import VehicleReports from '../../Hooks/Sql/ReportsStore/VehicleReports'
@@ -17,6 +19,7 @@ import ImgToBase64 from 'react-native-image-base64';
 import getReceiptSettings from '../../Hooks/Controller/ReceiptSetting/getReceiptSettings';
 import DeviceInfo from 'react-native-device-info';
 import ReceiptImageStorage from '../../Hooks/Sql/Receipt Setting Storage/ReceiptImageStorage';
+import storeUsers from '../../Hooks/Sql/User/storeuser';
 
 
 const data = [
@@ -30,6 +33,7 @@ const Unbilled = ({ navigation }) => {
     // NativeModules.MyPrinter is a reference to a native module named MyPrinter.  
     const MyModules = NativeModules.MyPrinter;
     const { retrieveAuthUser } = getAuthUser()
+    const { getUserByToken } = storeUsers()
 
     const { getAllUnbilledRecords } = VehicleInOutStore()
     // GET LOGO
@@ -37,6 +41,8 @@ const Unbilled = ({ navigation }) => {
     const { getReceiptImage } = ReceiptImageStorage()
     // State for manage the  picture/logo/image
     const [pic, setPic] = useState()
+    const [isBlueToothEnable, setIsBlueToothEnable] = useState(false)
+
     // State for manage the From date 
 
     const [unbilledData, setUnbilledData] = useState()
@@ -124,6 +130,10 @@ const Unbilled = ({ navigation }) => {
     // handle printing of Unbilled report
 
     const handleUnbilledPrint = async () => {
+        // if (!isBlueToothEnable) {
+        //     ToastAndroid.show('please enable the bluetooth first', ToastAndroid.SHORT);
+        //     return
+        //   }
         const options = {
             hour12: false,
             hour: '2-digit',
@@ -131,9 +141,11 @@ const Unbilled = ({ navigation }) => {
         };
         if (pl) {
             return
-        }
-        ;
-
+        };
+        // store return data into token variable
+        const token = await retrieveAuthUser();
+        // store return data into user variable
+        const user = await getUserByToken(token);
 
         const extractedData = unbilledData && unbilledData.map(({ receiptNo, date_time_in, vehicle_no }) => {
             const formatTime = new Date(date_time_in)
@@ -168,7 +180,7 @@ const Unbilled = ({ navigation }) => {
             })
         }
 
-        const imein = DeviceInfo.getSerialNumberSync();
+        const imein = user?.imei_no
         let payload = "-----------------------------------------------------------------------\n"
         payload += `DT: ${date.toLocaleDateString("en-GB")} TM: ${date.toLocaleTimeString(undefined, options)}\n`
         payload += `FROM: ${mydateFrom.toLocaleDateString("en-GB")}  TO: ${mydateTo.toLocaleDateString("en-GB")}\n`
@@ -249,6 +261,45 @@ const Unbilled = ({ navigation }) => {
         getReceiptImage().then(res => setPic(res.image)).catch(error => console.error(error))
     }, [])
 
+    async function checkBluetoothEnabled() {
+        try {
+          const granted = await PermissionsAndroid.request(
+            PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION,
+            {
+              title: 'Bluetooth Permission',
+              message: 'This app needs access to your location to check Bluetooth status.',
+              buttonNeutral: 'Ask Me Later',
+              buttonNegative: 'Cancel',
+              buttonPositive: 'OK',
+            },
+          );
+          if (granted === PermissionsAndroid.RESULTS.GRANTED) {
+            // Permission granted, check Bluetooth status
+            BleManager.enableBluetooth()
+              .then(() => {
+                // Success code
+                setIsBlueToothEnable(true)
+                console.log("The bluetooth is already enabled or the user confirm");
+              })
+              .catch((error) => {
+                // Failure code
+                console.log("The user refuse to enable bluetooth");
+              });
+            // const isEnabled = await BluetoothStatus.isEnabled();
+            // console.log('Bluetooth Enabled:', isEnabled);
+          } else {
+            // if bluetooth is not enabled call this functions it`s self.
+            checkBluetoothEnabled()
+            console.log('Bluetooth permission denied');
+          }
+        } catch (error) {
+          console.log('Error checking Bluetooth status:', error);
+        }
+      }
+
+      useEffect(()=>{
+        checkBluetoothEnabled()
+      },[])
 
     return (
         // get stored image and store is pic state.

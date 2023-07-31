@@ -4,7 +4,7 @@ import {
   TouchableOpacity,
   ScrollView,
 } from 'react-native';
-import React, {useContext, useState} from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 
 import InputComponent from '../../component/InputComponent';
 import ContactComponent from '../../component/ContactComponent';
@@ -15,15 +15,22 @@ import styles from '../../Styles/styles';
 import MainView from '../../component/MainView';
 import HeaderLogoComponent from '../../component/HeaderLogoComponent';
 
-import {AuthContext} from '../../Auth/AuthProvider';
+import { AuthContext } from '../../Auth/AuthProvider';
+import DeviceInfo from 'react-native-device-info';
 
-const SignInScreen = ({navigation}) => {
+const SignInScreen = ({ navigation }) => {
   const [text, onChangeText] = useState('');
   const [password, onChangePassword] = useState('');
-  const {login} = useContext(AuthContext);
+  const [deviceId, SetDeviceId] = useState('')
+  const { login } = useContext(AuthContext);
 
   console.log(text, password);
 
+
+  useEffect(()=>{
+   const deviceId = DeviceInfo.getUniqueIdSync()
+   SetDeviceId(deviceId)
+  },[])
 
   // const {createUser}=getDBconnection()
   // createUser ("pritam",'123')
@@ -47,6 +54,10 @@ const SignInScreen = ({navigation}) => {
         {/* ....... helper text */}
         <Text style={[styles.grettingText, styles.helper_text]}>
           {strings.helper_text}
+        </Text>
+
+        <Text style={{...styles.grettingText,...styles.helper_text,fontSize:20,fontWeight:'600'}}>
+          Your Device ID is : { deviceId}
         </Text>
         {/* ...... login container ....... */}
         <View style={[styles.login_container, styles.login_container]}>

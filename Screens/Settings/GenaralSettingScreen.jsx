@@ -6,7 +6,7 @@ import {
   View,
   Dimensions,
 } from 'react-native';
-import React, {useState, useEffect, useContext} from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import CustomHeader from '../../component/CustomHeader';
 import icons from '../../Resources/Icons/icons';
 import allColor from '../../Resources/Colors/Color';
@@ -18,36 +18,36 @@ import CustomButtonComponent from '../../component/CustomButtonComponent';
 import CustomDropdown from '../../component/CustomDropdown';
 import settingController from '../../Hooks/Controller/Setting/settingController';
 import settingInputHelper from '../../Hooks/InputOperations/settingInputHelper';
-import {AuthContext} from '../../Auth/AuthProvider';
+import { AuthContext } from '../../Auth/AuthProvider';
 const width = Dimensions.get('screen').width;
 
 const language = [
-  {label: 'English', value: 'E'},
-  {label: 'Hindi', value: 'H'},
-  {label: 'Tamil', value: 'T'},
+  { label: 'English', value: 'E' },
+  { label: 'Hindi', value: 'H' },
+  { label: 'Tamil', value: 'T' },
 ];
 
 const deviceMode = [
-  {label: 'Dual Mode', value: 'D'},
-  {label: 'Receipt Mode', value: 'R'},
-  {label: 'Bill Mode', value: 'B'},
-  {label: 'Fixed Mode', value: 'F'},
-  {label: 'Advanced Mode', value: 'A'},
+  { label: 'Dual Mode', value: 'D' },
+  { label: 'Receipt Mode', value: 'R' },
+  { label: 'Bill Mode', value: 'B' },
+  { label: 'Fixed Mode', value: 'F' },
+  { label: 'Advanced Mode', value: 'A' },
 
 ];
 
 const autoArchiveData = [
-  {label: '30 Days', value: '30'},
-  {label: '60 Days', value: '60'},
-  {label: '90 Days', value: '90'},
-  {label: '120 Days', value: '120'},
+  { label: '30 Days', value: '30' },
+  { label: '60 Days', value: '60' },
+  { label: '90 Days', value: '90' },
+  { label: '120 Days', value: '120' },
 ];
 
 const resetReceipt = [
-  {label: 'daily', value: 'D'},
-  {label: 'continuous', value: 'C'},
+  { label: 'daily', value: 'D' },
+  { label: 'continuous', value: 'C' },
 ];
-const SettingComponent = ({icon, text, children, style}) => {
+const SettingComponent = ({ icon, text, children, style }) => {
   return (
     <View
       style={{
@@ -59,21 +59,26 @@ const SettingComponent = ({icon, text, children, style}) => {
         ...style,
       }}>
       {/* {children} */}
-      <View style={{flex: 0.8, flexDirection: 'row', alignItems: 'center'}}>
+      <View style={{ flex: 0.8, flexDirection: 'row', alignItems: 'center' }}>
         {icon}
         <Text style={styles.text}>{text}</Text>
       </View>
-      <View style={{flex: 0.5, alignItems: 'flex-end'}}>{children}</View>
+      <View style={{ flex: 0.5, alignItems: 'flex-end' }}>{children}</View>
     </View>
   );
 };
 
 // {"adv_pay": "N", "auto_archive": 30, "created_at": "2023-05-26T13:02:01.000000Z", "dev_mod": "D", "max_receipt": 500, "mc_iemi_no": "1234567890", "mc_lang": "E", "otp_val": "Y", "parking_entry_type": "S", "report_flag": "Y", "reset_recipeit_no": "C", "setting_id": 1, "signIn_session": "12", "total_collection": "Y", "updated_at": "2023-05-26T13:02:01.000000Z", "vehicle_no": "Y"}
-const GenaralSettingScreen = ({navigation}) => {
+const GenaralSettingScreen = ({ navigation }) => {
   // const { generalSetting } = settingController()
 
   //  GETING GENARAL SETTINGS
-  const {generalSetting} = useContext(AuthContext);
+  const { generalSetting } = useContext(AuthContext);
+  if (!generalSetting) {
+    return <>
+      <Text>Loading .....</Text>
+    </>
+  }
 
   console.log(generalSetting);
   // const { input, addInitialData, handleChange } = settingInputHelper()
@@ -104,10 +109,10 @@ const GenaralSettingScreen = ({navigation}) => {
   }, []);
 
   return (
-    <View style={{flex: 1}}>
+    <View style={{ flex: 1 }}>
 
       <CustomHeader title={'General Setting'} navigation={navigation} />
-      <ScrollView style={{flex: 1, margin: 10}}>
+      <ScrollView style={{ flex: 1, margin: 10 }}>
         <View>
           {/* display language */}
           {mc_lang && (
@@ -137,7 +142,7 @@ const GenaralSettingScreen = ({navigation}) => {
               text={'Reports'}>
               <CustomSwitch
                 isEnabled={report_flag == 'Y' ? true : false}
-                handleChange={() => {}}
+                handleChange={() => { }}
               />
             </SettingComponent>
           )}
@@ -146,7 +151,7 @@ const GenaralSettingScreen = ({navigation}) => {
             <SettingComponent icon={icons.onepassword} text={'OTP Validation'}>
               <CustomSwitch
                 isEnabled={otp_val == 'Y' ? true : false}
-                handleChange={() => {}}
+                handleChange={() => { }}
               />
             </SettingComponent>
           )}
@@ -172,7 +177,7 @@ const GenaralSettingScreen = ({navigation}) => {
               text={'Total Collection'}>
               <CustomSwitch
                 isEnabled={total_collection == 'Y' ? true : false}
-                handleChange={() => {}}
+                handleChange={() => { }}
               />
             </SettingComponent>
           )}
@@ -184,7 +189,7 @@ const GenaralSettingScreen = ({navigation}) => {
               text={'Mandotary Vehicle Number'}>
               <CustomSwitch
                 isEnabled={vehicle_no == 'Y' ? true : false}
-                handleChange={() => {}}
+                handleChange={() => { }}
               />
             </SettingComponent>
           )}
@@ -196,7 +201,7 @@ const GenaralSettingScreen = ({navigation}) => {
               text={'Advanced Payment'}>
               <CustomSwitch
                 isEnabled={adv_pay == 'Y' ? true : false}
-                handleChange={() => {}}
+                handleChange={() => { }}
               />
             </SettingComponent>
           )}
@@ -223,9 +228,9 @@ const GenaralSettingScreen = ({navigation}) => {
               onChange={(e) => handleChange("autoAchiveData", e)}
             /> */}
 
-{ auto_archive &&             <CustomInputComponent.InputComponentWithText
+              {auto_archive && <CustomInputComponent.InputComponentWithText
                 value={auto_archive.toString()}
-                onChangeText={value => {}}
+                onChangeText={value => { }}
                 text={'Days'}
               />}
             </SettingComponent>
@@ -238,7 +243,7 @@ const GenaralSettingScreen = ({navigation}) => {
             <CustomInputComponent.InputComponentWithText
               show={true}
               value={max_receipt.toString()}
-              // onChangeText={(value) => handleChange("maximumReceipt", value)}
+            // onChangeText={(value) => handleChange("maximumReceipt", value)}
             />
           </SettingComponent>
 
@@ -268,7 +273,7 @@ const GenaralSettingScreen = ({navigation}) => {
 
 export default GenaralSettingScreen;
 
-export {SettingComponent};
+export { SettingComponent };
 
 const styles = StyleSheet.create({
   text: {

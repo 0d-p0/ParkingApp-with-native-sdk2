@@ -1,7 +1,9 @@
-import { PixelRatio, Pressable, StyleSheet, Text, View, ScrollView, Dimensions, ActivityIndicator, Alert, NativeModules } from 'react-native'
+import { PixelRatio, Pressable, StyleSheet, Text, View, ScrollView, Dimensions, ActivityIndicator, Alert, NativeModules,ToastAndroid ,PermissionsAndroid} from 'react-native'
 import React, { useEffect, useState } from 'react'
 import DateTimePicker from '@react-native-community/datetimepicker';
 import axios from 'axios'
+import BleManager from 'react-native-ble-manager';
+
 import CustomButtonComponent from '../../component/CustomButtonComponent';
 import CustomHeader from '../../component/CustomHeader';
 import allColor from '../../Resources/Colors/Color';
@@ -14,10 +16,15 @@ import getReceiptSettings from '../../Hooks/Controller/ReceiptSetting/getReceipt
 import DeviceInfo from 'react-native-device-info';
 import ReceiptImageStorage from '../../Hooks/Sql/Receipt Setting Storage/ReceiptImageStorage';
 import VehicleInOutStore from '../../Hooks/Sql/VehicleInOut/VehicleInOutStore';
+import storeUsers from '../../Hooks/Sql/User/storeuser';
 
 const CarReports = ({ navigation }) => {
     // NativeModules.MyPrinter is a reference to a native module named MyPrinter.   
     const MyModules = NativeModules.MyPrinter;
+    const { retrieveAuthUser } = getAuthUser()
+    const { getUserByToken } = storeUsers()
+    const [isBlueToothEnable, setIsBlueToothEnable] = useState(false)
+
     // State for manage the  total price
     const [totalPrice, setTotalPrice] = useState(0)
     // State for manage the  total quantity
@@ -46,6 +53,42 @@ const CarReports = ({ navigation }) => {
     const [mydateFrom, setDateFrom] = useState(new Date());
     const [displaymodeFrom, setModeFrom] = useState('date');
     const [isDisplayDateFrom, setShowFrom] = useState(false);
+
+    async function checkBluetoothEnabled() {
+        try {
+          const granted = await PermissionsAndroid.request(
+            PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION,
+            {
+              title: 'Bluetooth Permission',
+              message: 'This app needs access to your location to check Bluetooth status.',
+              buttonNeutral: 'Ask Me Later',
+              buttonNegative: 'Cancel',
+              buttonPositive: 'OK',
+            },
+          );
+          if (granted === PermissionsAndroid.RESULTS.GRANTED) {
+            // Permission granted, check Bluetooth status
+            BleManager.enableBluetooth()
+              .then(() => {
+                // Success code
+                setIsBlueToothEnable(true)
+                console.log("The bluetooth is already enabled or the user confirm");
+              })
+              .catch((error) => {
+                // Failure code
+                console.log("The user refuse to enable bluetooth");
+              });
+            // const isEnabled = await BluetoothStatus.isEnabled();
+            // console.log('Bluetooth Enabled:', isEnabled);
+          } else {
+            // if bluetooth is not enabled call this functions it`s self.
+            checkBluetoothEnabled()
+            console.log('Bluetooth permission denied');
+          }
+        } catch (error) {
+          console.log('Error checking Bluetooth status:', error);
+        }
+      }
 
     // handle change From date
     const changeSelectedDateFrom = (event, selectedDate) => {
@@ -84,7 +127,10 @@ const CarReports = ({ navigation }) => {
 
     // handle printing of Veicle report
     const handleUnbilledPrint = async () => {
-
+        // if (!isBlueToothEnable) {
+        //     ToastAndroid.show('please enable the bluetooth first', ToastAndroid.SHORT);
+        //     return
+        //   }
         const options = {
             hour12: false,
             hour: '2-digit',
@@ -92,8 +138,11 @@ const CarReports = ({ navigation }) => {
         };
         if (pl) {
             return
-        }
-        ;
+        };
+         // store return data into token variable
+         const token = await retrieveAuthUser();
+         // store return data into user variable
+         const user = await getUserByToken(token);
 
         [{ "TotalAdvance": 0, "opratorName": "Amit Mondal", "quantity": 2, "totalAmount": 160 }]
         const extractedData = unbilledData && unbilledData.map(({ vehicleType, quantity, TotalAdvance, totalAmount }) => ({
@@ -127,7 +176,7 @@ const CarReports = ({ navigation }) => {
             })
         }
 
-        const imein = DeviceInfo.getSerialNumberSync();
+        const imein = user?.imei_no
         let payload = "-----------------------------------------------------------------------\n"
         payload += `DT: ${date.toLocaleDateString("en-GB")} TM: ${date.toLocaleTimeString(undefined, options)}\n`
         payload += `FROM: ${mydateFrom.toLocaleDateString("en-GB")}  TO: ${mydateTo.toLocaleDateString("en-GB")}\n`
@@ -232,6 +281,7 @@ const CarReports = ({ navigation }) => {
 
     // run only once time
     useEffect(() => {
+        checkBluetoothEnabled()
         // get stored image and store is pic state.
         getReceiptImage().then(res => setPic(res.image)).catch(error => console.error(error))
     }, [])

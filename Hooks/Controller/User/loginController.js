@@ -17,7 +17,7 @@ function loginController() {
       // // }else{
       // //   imei_no = imei
       // // }
-      const imein = DeviceInfo.getSerialNumberSync();
+      const imein = DeviceInfo.getUniqueIdSync()
       //  "0300221120152387"
       //  DeviceInfo.getSerialNumberSync();
       

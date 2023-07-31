@@ -28,7 +28,7 @@ import { InternetStatusContext } from '../../App';
 import { AuthContext } from '../../Auth/AuthProvider';
 
 import { address } from '../../Router/address';
- import ThermalPrinterModule from 'react-native-thermal-printer';
+import ThermalPrinterModule from 'react-native-thermal-printer';
 import VehicleInOutStore from '../../Hooks/Sql/VehicleInOut/VehicleInOutStore';
 import getVehiclePrices from '../../Hooks/Controller/vechicles/getVehiclePrices';
 import { useIsFocused } from '@react-navigation/native';
@@ -38,7 +38,7 @@ import getAdvancePrices from '../../Hooks/Controller/AdvancePrice/getAdvancePric
 import vehicleRatesStorage from '../../Hooks/Sql/vechicles/vehicleRatesStorage';
 import { changeResetReceiptNo, isResetReceiptNo } from '../../Hooks/Receipt/isResetReceiptNo';
 import increaseReceiptNo from '../../Hooks/Receipt/increaseReceiptNo';
- 
+
 import bill from './bill.jpg'
 import advancePriceStorage from '../../Hooks/Sql/AdvancePricesStorage/advancePriceStorage';
 
@@ -55,7 +55,7 @@ const ReceiptScreen = ({ navigation }) => {
   const [currentTime, setCurrentTime] = useState(new Date());
 
   const { calculateTotalAmount, calculateTotalVehicleIn, calculateTotalVehicleOut, getAllInVehicles, getAllOutVehicles, updateIsUploadedINById, updateIsUploadedOUTById } = VehicleInOutStore()
-  const{getAdvancePricesByVehicleId} = advancePriceStorage()
+  const { getAdvancePricesByVehicleId } = advancePriceStorage()
   const [totalAmount, setTotalAmount] = useState()
   const [totalVehicleIn, setTotalVehicleIn] = useState()
   const [totalVehicleOut, setTotalVehicleOut] = useState()
@@ -287,7 +287,7 @@ const ReceiptScreen = ({ navigation }) => {
     }
     try {
       await ThermalPrinterModule.printBluetooth({
-        payload:  `[C]`,
+        payload: `[C]`,
         printerNbrCharactersPerLine: 30,
         printerDpi: 120,
         printerWidthMM: 58,
@@ -364,8 +364,8 @@ const ReceiptScreen = ({ navigation }) => {
 
   const handleNavigation = async (props) => {
     const result = await getVehicleRatesByVehicleId(props.vehicle_id);
-   
-    
+
+
     if (result.length == 0) {
       ToastAndroid.showWithGravityAndOffset(
         'Vehicle Rate Not available contact owner',
@@ -376,8 +376,8 @@ const ReceiptScreen = ({ navigation }) => {
       )
       return
     }
-     
-    if(generalSetting.adv_pay == "Y"){
+
+    if (generalSetting.adv_pay == "Y") {
       const advancePrice = await getAdvancePricesByVehicleId(props.vehicle_id)
       if (advancePrice.length == 0) {
         ToastAndroid.showWithGravityAndOffset(
@@ -397,7 +397,8 @@ const ReceiptScreen = ({ navigation }) => {
       userId: userDetails?.user_id,
       operatorName: userDetails?.name,
       receiptNo: receiptNo,
-      currentDayTotalReceipt: totalVehicleIn
+      currentDayTotalReceipt: totalVehicleIn,
+      imei_no: userDetails?.imei_no,
     });
   }
 

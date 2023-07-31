@@ -128,17 +128,17 @@ export const AuthProvider = ({ children }) => {
           );
         }
 
-        if (data?.user?.allow_flag != 'Y') {
-          setLoading(false);
-          ToastAndroid.showWithGravity(
-            'YOUR MACHINE IS NOT REGISTERED',
-            ToastAndroid.LONG,
-            ToastAndroid.TOP,
-          );
-          console.log("YOUR MACHINE IS  NOT ASSIGN")
-          // alert('you machine not registered');
-          return;
-        }
+        // if (data?.user?.allow_flag != 'Y') {
+        //   setLoading(false);
+        //   ToastAndroid.showWithGravity(
+        //     'YOUR MACHINE IS NOT REGISTERED',
+        //     ToastAndroid.LONG,
+        //     ToastAndroid.TOP,
+        //   );
+        //   console.log("YOUR MACHINE IS  NOT ASSIGN")
+        //   // alert('you machine not registered');
+        //   return;
+        // }
         if (data.status) {
           // delete user
           deleteUserById(data.user.user_id)

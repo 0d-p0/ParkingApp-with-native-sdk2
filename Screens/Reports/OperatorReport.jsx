@@ -1,7 +1,9 @@
-import { PixelRatio, Pressable, StyleSheet, Text, View, ScrollView, Dimensions, ActivityIndicator, Alert, NativeModules } from 'react-native'
+import { PixelRatio, Pressable, StyleSheet, Text, View, ScrollView, Dimensions, ActivityIndicator, Alert, NativeModules, ToastAndroid,PermissionsAndroid } from 'react-native'
 import React, { useEffect, useState } from 'react'
 import DateTimePicker from '@react-native-community/datetimepicker';
 import axios from 'axios'
+import BleManager from 'react-native-ble-manager';
+
 import CustomButtonComponent from '../../component/CustomButtonComponent';
 import CustomHeader from '../../component/CustomHeader';
 import allColor from '../../Resources/Colors/Color';
@@ -12,30 +14,34 @@ import VehicleInOutStore from '../../Hooks/Sql/VehicleInOut/VehicleInOutStore';
 import getReceiptSettings from '../../Hooks/Controller/ReceiptSetting/getReceiptSettings';
 import DeviceInfo from 'react-native-device-info';
 import ReceiptImageStorage from '../../Hooks/Sql/Receipt Setting Storage/ReceiptImageStorage';
+import storeUsers from '../../Hooks/Sql/User/storeuser';
 const width = Dimensions.get("screen").width
 
 const OperatorReport = ({ navigation }) => {
-     // NativeModules.MyPrinter is a reference to a native module named MyPrinter.  
+    // NativeModules.MyPrinter is a reference to a native module named MyPrinter.  
     const MyModules = NativeModules.MyPrinter;
-        // State for manage the  total price
+    const { retrieveAuthUser } = getAuthUser()
+    const { getUserByToken } = storeUsers()
+    const [isBlueToothEnable, setIsBlueToothEnable] = useState(false)
 
+    // State for manage the  total price
     const [totalPrice, setTotalPrice] = useState(0)
-      // State for manage the  total quantity
+    // State for manage the  total quantity
     const [totalQTY, setTotalQTY] = useState(0)
-      // State for manage the  total Advance Price
+    // State for manage the  total Advance Price
     const [totalAdvance, setTotalAdvance] = useState(0)
-   // State for manage the unBilled Data
+    // State for manage the unBilled Data
     const [unbilledData, setUnbilledData] = useState()
-        // State for manage the  loading values 
+    // State for manage the  loading values 
     const [loading, setLoading] = useState()
-   // State for preventing multiple button press
+    // State for preventing multiple button press
     const [pl, setpl] = useState(false)
     const date = new Date()
     // GET LOGO
-    
+
     // HOOKS help us to get local stored image
     const { getReceiptImage } = ReceiptImageStorage()
-        // State for manage the  picture/logo/image
+    // State for manage the  picture/logo/image
     const [pic, setPic] = useState()
     const { receiptSettings } = getReceiptSettings()
 
@@ -73,6 +79,42 @@ const OperatorReport = ({ navigation }) => {
     const [showGenerate, setShowGenerate] = useState(false)
     const [value, setValue] = useState(0)
 
+    async function checkBluetoothEnabled() {
+        try {
+            const granted = await PermissionsAndroid.request(
+                PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION,
+                {
+                    title: 'Bluetooth Permission',
+                    message: 'This app needs access to your location to check Bluetooth status.',
+                    buttonNeutral: 'Ask Me Later',
+                    buttonNegative: 'Cancel',
+                    buttonPositive: 'OK',
+                },
+            );
+            if (granted === PermissionsAndroid.RESULTS.GRANTED) {
+                // Permission granted, check Bluetooth status
+                BleManager.enableBluetooth()
+                    .then(() => {
+                        // Success code
+                        setIsBlueToothEnable(true)
+                        console.log("The bluetooth is already enabled or the user confirm");
+                    })
+                    .catch((error) => {
+                        // Failure code
+                        console.log("The user refuse to enable bluetooth");
+                    });
+                // const isEnabled = await BluetoothStatus.isEnabled();
+                // console.log('Bluetooth Enabled:', isEnabled);
+            } else {
+                // if bluetooth is not enabled call this functions it`s self.
+                checkBluetoothEnabled()
+                console.log('Bluetooth permission denied');
+            }
+        } catch (error) {
+            console.log('Error checking Bluetooth status:', error);
+        }
+    }
+
     // handle add Spaces between texts
     // these are some special spaces
     // because printer ignore the normal spaces
@@ -87,6 +129,10 @@ const OperatorReport = ({ navigation }) => {
     }
     // handle printing of operator report
     const handleUnbilledPrint = async () => {
+        // if (!isBlueToothEnable) {
+        //     ToastAndroid.show('please enable the bluetooth first', ToastAndroid.SHORT);
+        //     return
+        // }
         const options = {
             hour12: false,
             hour: '2-digit',
@@ -95,7 +141,10 @@ const OperatorReport = ({ navigation }) => {
         if (pl) {
             return
         }
-
+        // store return data into token variable
+        const token = await retrieveAuthUser();
+        // store return data into user variable
+        const user = await getUserByToken(token);
 
         const extractedData = unbilledData && unbilledData.map(({ opratorName, quantity, TotalAdvance, totalAmount }) => {
             // opratorName, quantity, TotalAdvance, totalAmount
@@ -120,7 +169,7 @@ const OperatorReport = ({ navigation }) => {
         })
 
         if (pic) {
-                   // Printing picture uisng ZCS sdk
+            // Printing picture uisng ZCS sdk
             const picData = pic.split('data:image/jpeg;base64,')
             MyModules.printImage(picData[1], (err, msg) => {
                 if (err) {
@@ -130,7 +179,8 @@ const OperatorReport = ({ navigation }) => {
             })
         }
 
-        const imein = DeviceInfo.getSerialNumberSync();
+        const imein = user?.imei_no
+
         let payload = "-----------------------------------------------------------------------\n"
         payload += `DT: ${date.toLocaleDateString("en-GB")} TM: ${date.toLocaleTimeString(undefined, options)}\n`
         payload += `FROM: ${mydateFrom.toLocaleDateString("en-GB")}  TO: ${mydateTo.toLocaleDateString("en-GB")}\n`
@@ -154,7 +204,7 @@ const OperatorReport = ({ navigation }) => {
 
         const mainPayLoad = addSpecialSpaces(payload)
         try {
-             // Printing Bill uisng ZCS sdk
+            // Printing Bill uisng ZCS sdk
             MyModules.printBill(mainPayLoad, 18, false, (err, msg) => {
                 if (err) {
                     console.error(err)
@@ -214,7 +264,7 @@ const OperatorReport = ({ navigation }) => {
             })
     }
     useEffect(() => {
-           // all the functions are call when mydateTo, mydateFrom values are changed
+        // all the functions are call when mydateTo, mydateFrom values are changed
         setValue(value + 1)
         if (value != 0) {
             setShowGenerate(true)
@@ -223,7 +273,8 @@ const OperatorReport = ({ navigation }) => {
     }, [mydateTo, mydateFrom])
 
     useEffect(() => {
-         // get stored image and store is pic state.
+        // get stored image and store is pic state.
+        checkBluetoothEnabled()
         getReceiptImage().then(res => setPic(res.image)).catch(error => console.error(error))
     }, [])
 

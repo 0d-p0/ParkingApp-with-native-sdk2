@@ -87,7 +87,7 @@ const CreateReceipt = ({ navigation, route }) => {
 
   // get data from previous screen
   // Data is extracted from the route.params, including type, id, userId, operatorName, and currentDayTotalReceipt.
-  const { type, id, userId, operatorName, currentDayTotalReceipt } = route.params;
+  const { type, id, userId, operatorName, currentDayTotalReceipt ,imei_no} = route.params;
 
   //This State holds isBlueToothEnable enable or not.
 
@@ -187,7 +187,7 @@ const CreateReceipt = ({ navigation, route }) => {
     // receiptNo holds the return value of currentReceiptNo
     const receiptNo = await currentReceiptNo();
     // mc_srl_no holds serial number
-    const mc_srl_no = DeviceInfo.getSerialNumberSync();
+    // const mc_srl_no = DeviceInfo.getSerialNumberSync();
 
     try {
       // if READ_PHONE_STATE is not available then request for permission.
@@ -213,8 +213,8 @@ const CreateReceipt = ({ navigation, route }) => {
         //store new vehicle data using createVehicleInOut() 
         //increaseReceiptNo by 1 
         // generate print using  handlePrintReceipt()
-        await Promise.all([createVehicleInOut(receiptNo, type, id, "S", vehicleNumber.toUpperCase(), currentTime.toISOString(), dev_mod, operatorName, userId, mc_srl_no, 0, "Y", 0, false), increaseReceiptNo(receiptNo),
-        handlePrintReceipt(receiptNo, mc_srl_no, true)
+        await Promise.all([createVehicleInOut(receiptNo, type, id, "S", vehicleNumber.toUpperCase(), currentTime.toISOString(), dev_mod, operatorName, userId, imei_no, 0, "Y", 0, false), increaseReceiptNo(receiptNo),
+        handlePrintReceipt(receiptNo, imei_no, true)
         ])
         //  and return from here no internet connectivity
         return
@@ -229,7 +229,7 @@ const CreateReceipt = ({ navigation, route }) => {
           vehicle_id: id,
           vehicle_no: vehicleNumber.toUpperCase(),
           receipt_type: 'S',
-          mc_srl_no: mc_srl_no,
+          mc_srl_no: imei_no,
           gst_flag: "Y"
         },
       ];
@@ -238,7 +238,7 @@ const CreateReceipt = ({ navigation, route }) => {
       const response = await handleVehicleIn(InData);
       if (response.status === 200) {
         // if status  equal to 200 run below block
-        await Promise.all([createVehicleInOut(receiptNo, type, id, "S", vehicleNumber.toUpperCase(), currentTime.toISOString(), dev_mod, operatorName, userId, mc_srl_no, 0, "Y", 0, true), increaseReceiptNo(receiptNo), handlePrintReceipt(receiptNo, mc_srl_no, true)])
+        await Promise.all([createVehicleInOut(receiptNo, type, id, "S", vehicleNumber.toUpperCase(), currentTime.toISOString(), dev_mod, operatorName, userId, imei_no, 0, "Y", 0, true), increaseReceiptNo(receiptNo), handlePrintReceipt(receiptNo, imei_no, true)])
 
         ToastAndroid.showWithGravity(
           'Uploaded',
@@ -247,7 +247,7 @@ const CreateReceipt = ({ navigation, route }) => {
         );
       } else {
         // if status not equal to 200 run below block
-        await Promise.all([createVehicleInOut(receiptNo, type, id, "S", vehicleNumber.toUpperCase(), currentTime.toISOString(), dev_mod, operatorName, userId, mc_srl_no, 0, "Y", 0, false), increaseReceiptNo(receiptNo), handlePrintReceipt(receiptNo, mc_srl_no, false)])
+        await Promise.all([createVehicleInOut(receiptNo, type, id, "S", vehicleNumber.toUpperCase(), currentTime.toISOString(), dev_mod, operatorName, userId, imei_no, 0, "Y", 0, false), increaseReceiptNo(receiptNo), handlePrintReceipt(receiptNo, imei_no, false)])
       }
 
 
@@ -286,7 +286,7 @@ const CreateReceipt = ({ navigation, route }) => {
     const receiptNo = await currentReceiptNo();
     // mc_srl_no holds serial number
 
-    const mc_srl_no = DeviceInfo.getSerialNumberSync();
+    // const mc_srl_no = DeviceInfo.getSerialNumberSync();
     // [{"advance_amount": "50.00", "advance_id": "2", "id": 2, "subclient_id": "1", "vehicle_id": "1"}]
     console.log("advance price is = ", advancePrice)
 
@@ -312,8 +312,8 @@ const CreateReceipt = ({ navigation, route }) => {
         //store new vehicle data using createVehicleInOut() 
         //increaseReceiptNo by 1 
         // generate print using  handlePrintReceipt()
-        await Promise.all([createVehicleInOut(receiptNo, type, id, "S", vehicleNumber.toUpperCase(), currentTime.toISOString(), dev_mod, operatorName, userId, mc_srl_no, 0, "Y", advancePrice[0].advance_amount, false), increaseReceiptNo(receiptNo),
-        handleAdvancePrintReceipt(receiptNo, advancePrice[0].advance_amount, mc_srl_no, false)
+        await Promise.all([createVehicleInOut(receiptNo, type, id, "S", vehicleNumber.toUpperCase(), currentTime.toISOString(), "A", operatorName, userId, imei_no, 0, "Y", advancePrice[0].advance_amount, false), increaseReceiptNo(receiptNo),
+        handleAdvancePrintReceipt(receiptNo, advancePrice[0].advance_amount, imei_no, false)
         ])
         //  and return from here no internet connectivity
         return
@@ -324,11 +324,11 @@ const CreateReceipt = ({ navigation, route }) => {
         {
           receiptNo: receiptNo,
           date_time_in: currentTime.toISOString(),
-          oprn_mode: dev_mod,
+          oprn_mode: "A",
           vehicle_id: id,
           vehicle_no: vehicleNumber.toUpperCase(),
           receipt_type: 'S',
-          mc_srl_no: mc_srl_no,
+          mc_srl_no: imei_no,
           advance: advancePrice[0].advance_amount,
           gst_flag: "Y"
         },
@@ -347,7 +347,7 @@ const CreateReceipt = ({ navigation, route }) => {
       if (response.status === 200) {
         // if status  equal to 200 run below block
         // STORE,INCREASE RECEIPT NO and HANDLE PRINTOUT
-        await Promise.all([createVehicleInOut(receiptNo, type, id, "S", vehicleNumber.toUpperCase(), currentTime.toISOString(), dev_mod, operatorName, userId, mc_srl_no, 0, "Y", advancePrice[0].advance_amount, true), increaseReceiptNo(receiptNo), handleAdvancePrintReceipt(receiptNo, advancePrice[0].advance_amount, mc_srl_no, true)
+        await Promise.all([createVehicleInOut(receiptNo, type, id, "S", vehicleNumber.toUpperCase(), currentTime.toISOString(), "A", operatorName, userId, imei_no, 0, "Y", advancePrice[0].advance_amount, true), increaseReceiptNo(receiptNo), handleAdvancePrintReceipt(receiptNo, advancePrice[0].advance_amount, imei_no, true)
         ])
 
         ToastAndroid.showWithGravity(
@@ -358,7 +358,7 @@ const CreateReceipt = ({ navigation, route }) => {
       } else {
         // if status not equal to 200 run below block
         // STORE,INCREASE RECEIPT NO and HANDLE PRINTOUT
-        await Promise.all([createVehicleInOut(receiptNo, type, id, "S", vehicleNumber.toUpperCase(), currentTime.toISOString(), dev_mod, operatorName, userId, mc_srl_no, 0, "Y", advancePrice[0].advance_amount, false), increaseReceiptNo(receiptNo), handleAdvancePrintReceipt(receiptNo, advancePrice[0].advance_amount, mc_srl_no, false)
+        await Promise.all([createVehicleInOut(receiptNo, type, id, "S", vehicleNumber.toUpperCase(), currentTime.toISOString(), "A", operatorName, userId, imei_no, 0, "Y", advancePrice[0].advance_amount, false), increaseReceiptNo(receiptNo), handleAdvancePrintReceipt(receiptNo, advancePrice[0].advance_amount, imei_no, false)
         ])
       }
 
@@ -454,7 +454,7 @@ const CreateReceipt = ({ navigation, route }) => {
         `[L]<b>VEHICLE NO : ${vehicleNumber.toUpperCase()}\n` +
         `[L]<b>ADVANCE : ${advance}\n` +
         `[L]<b>IN Time : ${formattedDateTime}\n\n` +
-        `[R]<qrcode size='35'>${receiptNo}-*-${type}-*-${id}-*-${'S'}-*-${vehicleNumber.toUpperCase()}-*-${currentTime.toISOString()}-*-${dev_mod}-*-${operatorName}-*-${userId}-*-${mc_srl_no}-*-${0}-*-${"Y"}-*-${advance}-*-${isUploadedIN}-*-${adv_pay}</qrcode>\n\n`
+        `[R]<qrcode size='35'>${receiptNo}-*-${type}-*-${id}-*-${'S'}-*-${vehicleNumber.toUpperCase()}-*-${currentTime.toISOString()}-*-${"A"}-*-${operatorName}-*-${userId}-*-${mc_srl_no}-*-${0}-*-${"Y"}-*-${advance}-*-${isUploadedIN}-*-${adv_pay}</qrcode>\n\n`
 
 
       if (receiptSettings.footer1_flag == "1") {

@@ -282,9 +282,6 @@ const OutpassPrintUI = ({ route, navigation }) => {
     const token = await retrieveAuthUser();
     // store return data into user variable
     const user = await getUserByToken(token);
-    // store return data into mc_srl_no_out variable
-    const mc_srl_no_out = DeviceInfo.getSerialNumberSync();
-
 
     // crete a blanck data array
     // which holds the vehicle data
@@ -304,7 +301,7 @@ const OutpassPrintUI = ({ route, navigation }) => {
         paid_amt: data?.[1]?.value,
         gst_flag: 'Y',
         duration: 0,
-        mc_srl_no_out: mc_srl_no_out,
+        mc_srl_no_out: user?.imei_no,
         mc_srl_no: others?.mc_srl_no
       })
     }
@@ -314,7 +311,7 @@ const OutpassPrintUI = ({ route, navigation }) => {
       data2.push({
         receiptNo: data?.[0]?.value,
         date_time_in: others?.date_time_in,
-        oprn_mode: others?.oprn_mode,
+        oprn_mode: "A",
         vehicle_id: others.vehicle_id,
         vehicle_no: data[5].value,
         receipt_type: 'S',
@@ -323,7 +320,7 @@ const OutpassPrintUI = ({ route, navigation }) => {
         paid_amt: data[1].value,
         gst_flag: 'N',
         duration: 0,
-        mc_srl_no_out: mc_srl_no_out,
+        mc_srl_no_out: user?.imei_no,
         advance: others.advance,
         mc_srl_no: others.mc_srl_no
       })
@@ -336,7 +333,7 @@ const OutpassPrintUI = ({ route, navigation }) => {
     if (!isOnline) {
       await createOrUpdateVehicleInOut(
         others.receiptNo, others.vehicleType, others.vehicle_id, others.receipt_type,
-        others.vehicle_no, others.date_time_in, others.oprn_mode, user.name, others.user_id_in, others.mc_srl_no, others.date_time_out, user.user_id, data[1].value, "Y", 0, mc_srl_no_out, others.advance, others.isUploadedIN, false
+        others.vehicle_no, others.date_time_in, others.oprn_mode, user.name, others.user_id_in, others.mc_srl_no, others.date_time_out, user.user_id, data[1].value, "Y", 0, user?.imei_no, others.advance, others.isUploadedIN, false
       )
       ToastAndroid.showWithGravity(
         'car out data store in offfline',
@@ -361,7 +358,7 @@ const OutpassPrintUI = ({ route, navigation }) => {
       );
       await createOrUpdateVehicleInOut(
         others.receiptNo, others.vehicleType, others.vehicle_id, others.receipt_type,
-        others.vehicle_no, others.date_time_in, others.oprn_mode, user.name, others.user_id_in, others.mc_srl_no, others.date_time_out, user.user_id, data[1].value, "Y", 0, mc_srl_no_out, others.advance, others.isUploadedIN, false
+        others.vehicle_no, others.date_time_in, others.oprn_mode, user.name, others.user_id_in, others.mc_srl_no, others.date_time_out, user.user_id, data[1].value, "Y", 0, user?.imei_no, others.advance, others.isUploadedIN, false
       )
       // await addOutpassEntry(data2);
     }
@@ -372,7 +369,7 @@ const OutpassPrintUI = ({ route, navigation }) => {
     if (res.status == 200) {
       createOrUpdateVehicleInOut(
         others.receiptNo, others.vehicleType, others.vehicle_id, others.receipt_type,
-        others.vehicle_no, others.date_time_in, others.oprn_mode, user.name, others.user_id_in, others.mc_srl_no, others.date_time_out, user.user_id, data[1].value, "Y", 0, mc_srl_no_out, others.advance, others.isUploadedIN, true
+        others.vehicle_no, others.date_time_in, others.oprn_mode, user.name, others.user_id_in, others.mc_srl_no, others.date_time_out, user.user_id, data[1].value, "Y", 0, user?.imei_no, others.advance, others.isUploadedIN, true
       )
       ToastAndroid.showWithGravity(
         'car out data upload successfully',

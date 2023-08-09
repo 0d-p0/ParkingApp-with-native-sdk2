@@ -32,10 +32,14 @@ import VehicleInOutStore from '../../Hooks/Sql/VehicleInOut/VehicleInOutStore';
 import { Dropdown } from 'react-native-element-dropdown';
 import HourlyPriceCalculate from '../../Hooks/PriceCalculator/HourlyPriceCalculate';
 import DayTimePriceCalculate from '../../Hooks/PriceCalculator/DayTimePriceCalculate';
+import GstPriceCalculator from '../../Hooks/PriceCalculator/GstPriceCalculator';
+import gstSettingsController from '../../Hooks/Controller/GST_Settings/gstSettingsController';
 
 const OutpassScreen = ({ navigation }) => {
   const { retrieveAuthUser } = getAuthUser();
   const isOnline = useContext(InternetStatusContext);
+  // Get GST Settings
+  const { gstSettings } = gstSettingsController()
 
 
   // dev_mod = "F"
@@ -71,6 +75,8 @@ const OutpassScreen = ({ navigation }) => {
   const { getDataByIdOrVehicleNumberStartsWith } = VehicleInOutStore();
 
   const getVehicleInfo = async number => {
+    GstPriceCalculator()
+
     try {
       if (number) {
         setLoading(true);
@@ -130,7 +136,7 @@ const OutpassScreen = ({ navigation }) => {
     }
 
     if (result[0].rate_type == 'T') {
-        // If Rate type is T, T For Timely
+      // If Rate type is T, T For Timely
       const testStrtT = new Date(start_time);
       const testEndT = new Date(end_time);
 
@@ -181,7 +187,7 @@ const OutpassScreen = ({ navigation }) => {
     const inDateFormat = new Date(dateTimeString);
     const timestamp = inDateFormat.getTime();
 
-    const price = await calculateTotalPrice(
+    let price = await calculateTotalPrice(
       data?.[index]?.vehicle_id,
       timestamp,
       date.getTime(),
@@ -199,7 +205,7 @@ const OutpassScreen = ({ navigation }) => {
     // console.log(price);
 
     const totalDuration = calculateDuration(timestamp, date.getTime());
-
+    const gstPrice = GstPriceCalculator(gstSettings, price)
     svp(price);
     console.log(price)
 
@@ -208,10 +214,32 @@ const OutpassScreen = ({ navigation }) => {
       label: 'RECEIPT NO',
       value: data?.[index]?.receiptNo || 1,
     });
-    vData.push({
-      label: 'PARKING FEES',
-      value: price,
-    });
+    if (gstSettings) {
+      vData.push({
+        label: 'BASE AMOUNT',
+        value: gstPrice.price,
+      });
+      vData.push({
+        label: 'CGST',
+        value: gstPrice.CGST,
+      });
+      vData.push({
+        label: 'SGST',
+        value: gstPrice.SGST,
+      });
+      vData.push({
+        label: 'PARKING FEES',
+        value: gstPrice.totalPrice,
+      });
+    }
+    if (!gstSettings) {
+      vData.push({
+        label: 'PARKING FEES',
+        value: price,
+      });
+    }
+
+
     if (data?.[index].advance != '0') {
       vData.push({
         label: 'ADVANCE AMOUNT',
@@ -252,7 +280,7 @@ const OutpassScreen = ({ navigation }) => {
         ' ' +
         date.toLocaleTimeString(undefined, options),
     });
-  
+
     vData.push({
       label: 'DURATION',
       value: totalDuration,

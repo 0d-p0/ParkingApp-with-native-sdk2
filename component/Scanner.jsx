@@ -1,4 +1,4 @@
-import React, {useContext, useState} from 'react';
+import React, { useContext, useState } from 'react';
 import {
   StyleSheet,
   View,
@@ -9,7 +9,7 @@ import {
   Pressable,
   ToastAndroid,
 } from 'react-native';
-import {RNCamera} from 'react-native-camera';
+import { RNCamera } from 'react-native-camera';
 import QRCodeScanner from 'react-native-qrcode-scanner';
 import icons from '../Resources/Icons/icons';
 
@@ -18,19 +18,23 @@ import vehicleRatesStorage from '../Hooks/Sql/vechicles/vehicleRatesStorage';
 import VehicleInOutStore from '../Hooks/Sql/VehicleInOut/VehicleInOutStore';
 import HourlyPriceCalculate from '../Hooks/PriceCalculator/HourlyPriceCalculate';
 import DayTimePriceCalculate from '../Hooks/PriceCalculator/DayTimePriceCalculate';
+import gstSettingsController from '../Hooks/Controller/GST_Settings/gstSettingsController';
+import GstPriceCalculator from '../Hooks/PriceCalculator/GstPriceCalculator';
 
-const Scanner = ({navigation}) => {
-  const {getVehicleRatesByVehicleId} = vehicleRatesStorage();
-  const {handleCheckIsVehicleOut} = VehicleInOutStore();
+const Scanner = ({ navigation }) => {
+  const { getVehicleRatesByVehicleId } = vehicleRatesStorage();
+  const { handleCheckIsVehicleOut } = VehicleInOutStore();
 
   const [scanning, setScanning] = useState(true);
   const [on, setOn] = useState(false);
+  // Get GST Settings
+  const { gstSettings } = gstSettingsController()
 
   // const entrydate = new Date(data?.[0]?.time || data?.[0]?.date_time_in);
 
-  const options = {hour12: false, hour: '2-digit', minute: '2-digit'};
+  const options = { hour12: false, hour: '2-digit', minute: '2-digit' };
 
-  const dateoptions = {day: '2-digit', month: '2-digit', year: '2-digit'};
+  const dateoptions = { day: '2-digit', month: '2-digit', year: '2-digit' };
   // const formattedDate = entrydate.toLocaleDateString(undefined, dateoptions);
   // const formattedTime = entrydate.toLocaleTimeString(undefined, options);
 
@@ -46,7 +50,7 @@ const Scanner = ({navigation}) => {
     end_time,
   ) {
     const result = await getVehicleRatesByVehicleId(vehicleId);
-     
+
     if (result[0].rate_type == 'H') {
       const price = HourlyPriceCalculate(
         result,
@@ -57,7 +61,7 @@ const Scanner = ({navigation}) => {
     }
 
     if (result[0].rate_type == 'T') {
-      const {price} = DayTimePriceCalculate(start_time, end_time, result);
+      const { price } = DayTimePriceCalculate(start_time, end_time, result);
       return price;
     }
   }
@@ -134,18 +138,18 @@ const Scanner = ({navigation}) => {
       const diffInMinutes = Math.floor(diffInMilliseconds / (1000 * 60));
       const diffHours = Math.floor(diffInMinutes / 60);
       const diffDays = Math.floor(diffHours / 24);
-  
+
       if (diffInMinutes >= 60) {
         duration = `${diffHours} hours ${diffInMinutes % 60} minutes`;
       } else {
         duration = `${diffInMinutes} minutes`;
       }
-  
+
       if (diffHours >= 24) {
         duration = `${diffDays} days ${diffHours % 24} hours ${diffInMinutes % 60
           } minutes`;
       }
-  
+
       return duration;
     }
 
@@ -163,15 +167,37 @@ const Scanner = ({navigation}) => {
 
     console.log('--------------price --------------', price);
     const totalDuration = calculateDuration(timestamp, date.getTime());
+    const gstPrice = GstPriceCalculator(gstSettings, price)
+
     const vData = [];
     vData.push({
       label: 'RECEIPT NO',
       value: result.receiptNo,
     });
-    vData.push({
-      label: 'PARKING FEES',
-      value: price,
-    });
+    if (gstSettings) {
+      vData.push({
+        label: 'BASE AMOUNT',
+        value: gstPrice.price,
+      });
+      vData.push({
+        label: 'CGST',
+        value: gstPrice.CGST,
+      });
+      vData.push({
+        label: 'SGST',
+        value: gstPrice.SGST,
+      });
+      vData.push({
+        label: 'PARKING FEES',
+        value: gstPrice.totalPrice,
+      });
+    }
+    if (!gstSettings) {
+      vData.push({
+        label: 'PARKING FEES',
+        value: price,
+      });
+    }
     // ["8", "bus", "ALL LL", "26/06/23 11:54", "4", "A", "50"]
 
     if (result.advance != '0') {
@@ -231,7 +257,7 @@ const Scanner = ({navigation}) => {
   return (
     <View style={styles.container}>
       {scanning && (
-        <View style={{top: PixelRatio.roundToNearestPixel(50)}}>
+        <View style={{ top: PixelRatio.roundToNearestPixel(50) }}>
           <Text
             style={{
               fontWeight: '600',
@@ -248,7 +274,7 @@ const Scanner = ({navigation}) => {
             ? RNCamera.Constants.FlashMode.torch
             : RNCamera.Constants.FlashMode.off
         }
-        cameraProps={{captureAudio: false}}
+        cameraProps={{ captureAudio: false }}
         reactivate={true}
         reactivateTimeout={3000}
         showMarker={true}

@@ -1,6 +1,6 @@
-const baseurl = 'https://parking.opentech4u.co.in/api/parking'
+// const baseurl = 'https://parking.opentech4u.co.in/api/parking'
 // const baseurl = 'http://192.168.1.218/sss/powercraft/api/parking'
-// const baseurl = 'http://192.168.1.8/sss/parking/api/parking'
+const baseurl = 'http://192.168.1.8/sss/parking/api/parking'
 
 exports.address={
   login:`${baseurl}/login`,
@@ -22,4 +22,6 @@ exports.address={
   unbilledReports:`${baseurl}/unbilled`,
   advance:`${baseurl}/advance`,
   receiptSettings:`${baseurl}/get_receopt_setting`,
+  gstSettings:`${baseurl}/gist_list`,
+  isUser:`${baseurl}/check_user`
 }

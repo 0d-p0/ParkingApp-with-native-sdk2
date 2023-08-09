@@ -19,6 +19,8 @@ const OutpassPrintUI = ({ route, navigation }) => {
   // Extract data and others from the route params  
   const { data, others } = route.params;
 
+  console.log("----------------------", data)
+
   // helper Function to get Current user, which store in offline using SqlLite.
   const { getUserByToken } = storeUsers()
   // this function return the token.which store in offline using Async storage
@@ -156,15 +158,12 @@ const OutpassPrintUI = ({ route, navigation }) => {
       if (receiptSettings.header2_flag == "1") {
         payload += `[c]${receiptSettings.header2}\n`
       }
+    
+      payload += `[C]<B><font size='big'>---------------</font>\n`
 
-      payload += `[C]<B><font size='big'>---------------</font>\n` +
-        `[L]<b>RECEIPT NO : ${data[0].value}\n` +
-        `[L]<b>PARKING FEES : ${data[1].value}\n` +
-        `[L]<b>VEHICLE TYPE : ${data[2].value}\n` +
-        `[L]<b>VEHICLE NO : ${data[3].value}\n` +
-        `[L]<b>IN Time : ${data[4].value}\n` +
-        `[L]<b>OUT Time : ${data[5].value}\n` +
-        `[L]<b>DURATION : ${data[data.length - 1].value}\n`
+      data.forEach((item) => {
+        payload += `[L]<b> ${item.label} : ${item.value}\n`
+      })
 
       if (receiptSettings.footer1_flag == "1") {
         payload += `[C] ${receiptSettings.footer1} \n`
@@ -236,15 +235,9 @@ const OutpassPrintUI = ({ route, navigation }) => {
       }
 
       payload += `[C]<B><font size='big'>---------------</font>\n` +
-        `[L]<b>RECEIPT NO : ${data[0].value}\n` +
-        `[L]<b>PARKING FEES : ${data[1].value}\n` +
-        `[L]<b>Advance AMOUNT : ${data[2].value}\n` +
-        `[L]<b>BALANCE AMOUNT : ${data[3].value}\n` +
-        `[L]<b>VEHICLE TYPE : ${data[4].value}\n` +
-        `[L]<b>VEHICLE NO : ${data[5].value}\n` +
-        `[L]<b>IN Time : ${data[6].value}\n` +
-        `[L]<b>OUT Time : ${data[7].value}\n` +
-        `[L]<b>DURATION : ${data[data.length - 1].value}\n\n`
+        data.forEach((item) => {
+          payload += `[L]<b> ${item.label} : ${item.value}\n`
+        })
 
       if (receiptSettings.footer1_flag == "1") {
         payload += `[C] ${receiptSettings.footer1} \n`
@@ -274,11 +267,16 @@ const OutpassPrintUI = ({ route, navigation }) => {
     setLoading(false)
 
   };
-
+  const findValueByLabel = (array, label) => {
+    const item = array.find(item => item.label === label);
+    return item ? item.value : null;
+  };
+  
 
   // It`s handle the upload and offline storing of vehicle data.
   const handleStoreOrUploadCarOut = async () => {
-
+    const PARKING_FEES = findValueByLabel(data, "PARKING FEES");
+    
     // store return data into token variable
     const token = await retrieveAuthUser();
     // store return data into user variable
@@ -299,7 +297,7 @@ const OutpassPrintUI = ({ route, navigation }) => {
         receipt_type: 'S',
         date_time_out: others?.date_time_out,
         user_id_out: others?.userId || user?.id,
-        paid_amt: data?.[1]?.value,
+        paid_amt: PARKING_FEES,
         gst_flag: 'Y',
         duration: 0,
         mc_srl_no_out: user?.imei_no,
@@ -318,7 +316,7 @@ const OutpassPrintUI = ({ route, navigation }) => {
         receipt_type: 'S',
         date_time_out: others?.date_time_out,
         user_id_out: others.userId || user?.id,
-        paid_amt: data[1].value,
+        paid_amt: PARKING_FEES,
         gst_flag: 'N',
         duration: 0,
         mc_srl_no_out: user?.imei_no,
@@ -326,7 +324,7 @@ const OutpassPrintUI = ({ route, navigation }) => {
         mc_srl_no: others.mc_srl_no
       })
     }
-    console.log("----------------------data 2 -----------------------",data2)
+    console.log("----------------------data 2 -----------------------", data2)
     // setLoading(false)
     // return
 
@@ -334,7 +332,7 @@ const OutpassPrintUI = ({ route, navigation }) => {
     if (!isOnline) {
       await createOrUpdateVehicleInOut(
         others.receiptNo, others.vehicleType, others.vehicle_id, others.receipt_type,
-        others.vehicle_no, others.date_time_in, others.oprn_mode, user.name, others.user_id_in, others.mc_srl_no, others.date_time_out, user.user_id, data[1].value, "Y", 0, user?.imei_no, others.advance, others.isUploadedIN, false
+        others.vehicle_no, others.date_time_in, others.oprn_mode, user.name, others.user_id_in, others.mc_srl_no, others.date_time_out, user.user_id,PARKING_FEES, "Y", 0, user?.imei_no, others.advance, others.isUploadedIN, false
       )
       ToastAndroid.showWithGravity(
         'car out data store in offfline',
@@ -359,7 +357,7 @@ const OutpassPrintUI = ({ route, navigation }) => {
       );
       await createOrUpdateVehicleInOut(
         others.receiptNo, others.vehicleType, others.vehicle_id, others.receipt_type,
-        others.vehicle_no, others.date_time_in, others.oprn_mode, user.name, others.user_id_in, others.mc_srl_no, others.date_time_out, user.user_id, data[1].value, "Y", 0, user?.imei_no, others.advance, others.isUploadedIN, false
+        others.vehicle_no, others.date_time_in, others.oprn_mode, user.name, others.user_id_in, others.mc_srl_no, others.date_time_out, user.user_id, PARKING_FEES, "Y", 0, user?.imei_no, others.advance, others.isUploadedIN, false
       )
       // await addOutpassEntry(data2);
     }
@@ -370,7 +368,7 @@ const OutpassPrintUI = ({ route, navigation }) => {
     if (res.status == 200) {
       createOrUpdateVehicleInOut(
         others.receiptNo, others.vehicleType, others.vehicle_id, others.receipt_type,
-        others.vehicle_no, others.date_time_in, others.oprn_mode, user.name, others.user_id_in, others.mc_srl_no, others.date_time_out, user.user_id, data[1].value, "Y", 0, user?.imei_no, others.advance, others.isUploadedIN, true
+        others.vehicle_no, others.date_time_in, others.oprn_mode, user.name, others.user_id_in, others.mc_srl_no, others.date_time_out, user.user_id, PARKING_FEES, "Y", 0, user?.imei_no, others.advance, others.isUploadedIN, true
       )
       ToastAndroid.showWithGravity(
         'car out data upload successfully',

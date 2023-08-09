@@ -41,6 +41,7 @@ import increaseReceiptNo from '../../Hooks/Receipt/increaseReceiptNo';
 
 import bill from './bill.jpg'
 import advancePriceStorage from '../../Hooks/Sql/AdvancePricesStorage/advancePriceStorage';
+import gstSettingsController from '../../Hooks/Controller/GST_Settings/gstSettingsController';
 
 const ReceiptScreen = ({ navigation }) => {
   const MyNativeModule = NativeModules.MyPrinter;
@@ -50,7 +51,8 @@ const ReceiptScreen = ({ navigation }) => {
   const { generalSetting } = useContext(AuthContext)
 
   const [vechicles, setVechicles] = useState();
-
+  // GST SETTINGS
+  gstSettingsController()
   // setter and getter current time
   const [currentTime, setCurrentTime] = useState(new Date());
 
@@ -69,7 +71,7 @@ const ReceiptScreen = ({ navigation }) => {
   const { getVehicleRatesByVehicleId } = vehicleRatesStorage()
   // const { handleGetReceiptSettings } = 
   const [userDetails, setUserDetails] = useState();
-  
+
   // const { ding } = playSound()
   const [isBlueToothEnable, setIsBlueToothEnable] = useState(false)
   async function checkBluetoothEnabled() {
@@ -335,14 +337,38 @@ const ReceiptScreen = ({ navigation }) => {
     }
 
   }
+  async function checkUserIsAvailable() {
+    if (isOnline && userDetails) {
+      console.log(`${address.isUser}?user_id=${userDetails?.user_id}`)
+
+      try {
+        const res = await axios.get(`${address.isUser}?user_id=${userDetails?.user_id}`)
+        console.log("_____________________DDDDDDDDDDDD_______________________", res.data)
+      } catch (error) {
+        if (error.response) {
+          // The client was given an error response (5xx, 4xx)
+          console.log(error.response.data);
+          console.log(error.response.status);
+          console.log(error.response.headers);
+        } else if (error.request) {
+          // The client never received a response, and the request was never left
+        } else {
+          // Anything else
+        }
+      }
+    }
+  }
+
 
   useEffect(() => {
     getUserDetails();
     getStoreVechiclesData();
     // dashboardDAta();
-
   }, [isOnline]);
+  useEffect(() => {
+    checkUserIsAvailable()
 
+  }, [isOnline, userDetails])
   useEffect(() => {
     if (isFoccused) {
       calculateTotalAmount().then(res => { setTotalAmount(res) }).catch(err => console.error(err))

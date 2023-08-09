@@ -99,7 +99,7 @@ export const AuthProvider = ({ children }) => {
 
     await loginHandaler(mobile, password)
       .then(res => {
-        // console.log(res)
+        // console.log("__________________________________________________<>",res)
         setLoading(true);
         const data = res.data;
         if(!data){

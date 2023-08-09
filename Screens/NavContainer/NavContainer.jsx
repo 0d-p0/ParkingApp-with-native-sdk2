@@ -63,8 +63,8 @@ const NavContainer = () => {
       ) : (
         <Stack.Navigator screenOptions={{headerShown: false}}>
           <Stack.Screen name="sign_in" component={SignInScreen} />
-          <Stack.Screen name="sign_up" component={SignUpScreen} />
-          <Stack.Screen name="forgot_password" component={ForgotPassword} />
+          {/* <Stack.Screen name="sign_up" component={SignUpScreen} />
+          <Stack.Screen name="forgot_password" component={ForgotPassword} /> */}
         </Stack.Navigator>
       )}
     </NavigationContainer>

@@ -88,7 +88,7 @@ const CreateReceipt = ({ navigation, route }) => {
 
   // get data from previous screen
   // Data is extracted from the route.params, including type, id, userId, operatorName, and currentDayTotalReceipt.
-  const { type, id, userId, operatorName, currentDayTotalReceipt ,imei_no} = route.params;
+  const { type, id, userId, operatorName, currentDayTotalReceipt, imei_no, advanceData } = route.params;
 
   //This State holds isBlueToothEnable enable or not.
 
@@ -585,47 +585,19 @@ const CreateReceipt = ({ navigation, route }) => {
           </View>
           {/* ..........receipt type ........... */}
 
-          <View style={{ marginTop: normalize(20) }}>
-            <Text style={styles.vehicle_text}>Receipt Type</Text>
+          {<View style={{ marginTop: normalize(20) }}>
+            <Text style={{ ...styles.vehicle_text, color: 'red' }}> Advance Price is On </Text>
             <View
               style={{
                 marginLeft: normalize(10),
                 flexDirection: 'row',
                 alignItems: 'center',
               }}>
-              {/* ........ single........ */}
-              {/* <View style={{flexDirection: 'row', alignItems: 'center'}}>
-                <CheckBox
-                  style={{borderRadius: '50%'}}
-                  disabled={false}
-                  value={toggleCheckBox}
-                  onValueChange={newValue => setToggleCheckBox(newValue)}
-                />
-                <Text
-                  style={{color: allColor['primary-color'], fontWeight: '900'}}>
-                  Single
-                </Text>
-              </View> */}
-              {/* ....... multiple ......... */}
-              {/* <View
-                style={{
-                  flexDirection: 'row',
-                  alignItems: 'center',
-                  marginLeft: normalize(10),
-                }}>
-                <CheckBox
-                  style={{borderRadius: '50%'}}
-                  disabled={false}
-                  value={toggleCheckBox}
-                  onValueChange={newValue => setToggleCheckBox(newValue)}
-                />
-                <Text
-                  style={{color: allColor['primary-color'], fontWeight: '900'}}>
-                  Multiple
-                </Text>
-              </View> */}
+               <Text  style={{ ...styles.vehicle_text, color: 'red' }}>
+                 Collect   ₹{advanceData?.advance_amount}    rupees from customer
+               </Text>
             </View>
-          </View>
+          </View>}
           {/* ......... vehicle Number .......... */}
           <View style={{ marginTop: normalize(20) }}>
             <Text style={styles.vehicle_text}>Vechicle Number</Text>

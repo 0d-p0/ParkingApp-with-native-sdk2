@@ -420,9 +420,10 @@ const ReceiptScreen = ({ navigation }) => {
       )
       return
     }
-
+    let advancePrice = false;
     if (generalSetting.adv_pay == "Y") {
-      const advancePrice = await getAdvancePricesByVehicleId(props.vehicle_id)
+      advancePrice = await getAdvancePricesByVehicleId(props.vehicle_id)
+      alert(JSON.stringify(advancePrice))
       if (advancePrice.length == 0) {
         ToastAndroid.showWithGravityAndOffset(
           'Advance price Not available contact owner',
@@ -443,6 +444,7 @@ const ReceiptScreen = ({ navigation }) => {
       receiptNo: receiptNo,
       currentDayTotalReceipt: totalVehicleIn,
       imei_no: userDetails?.imei_no,
+      advanceData: advancePrice[0]
     });
   }
 

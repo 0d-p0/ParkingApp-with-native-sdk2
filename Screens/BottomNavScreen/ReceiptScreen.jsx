@@ -197,6 +197,7 @@ const ReceiptScreen = ({ navigation }) => {
         )
       }
       if (inVehiledata.length != 0) {
+        console.log("---------IN car--------------", inVehiledata)
         const token = await retrieveAuthUser();
         inVehiledata.forEach(async element => {
           const newVinData = [element]
@@ -222,6 +223,7 @@ const ReceiptScreen = ({ navigation }) => {
                 50,
               );
               console.error(error);
+              console.warn("errior")
             });
 
         });

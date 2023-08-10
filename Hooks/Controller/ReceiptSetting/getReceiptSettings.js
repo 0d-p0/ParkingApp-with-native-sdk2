@@ -7,7 +7,7 @@ import getAuthUser from '../../getAuthUser'
 
 function getReceiptSettings() {
     const isOnline = useContext(InternetStatusContext)
-    const { addNewReceiptSetting, getAllReceiptSetting } = ReceiptSettingStorage()
+    const { addNewReceiptSetting, getAllReceiptSetting, } = ReceiptSettingStorage()
     const { retrieveAuthUser } = getAuthUser()
     const [receiptSettings, setReceiptSettings] = useState("hello")
 
@@ -34,7 +34,8 @@ function getReceiptSettings() {
         }).then(async res => {
             // console.log("from receipt settings  ", res.data.data)
             // setReceiptSettings(res.data.data[0])
-            const { header1, header2, footer1, footer2, header1_flag, header2_flag, footer1_flag, footer2_flag, image_flag } = res.data.data[0]
+            const { header1, header2, footer1, footer2, header1_flag, header2_flag, footer1_flag, footer2_flag, image_flag } = res.data.data[0] || {}
+            console.log(res.data.data[0])
             addNewReceiptSetting(header1, header2, footer1, footer2, header1_flag, header2_flag, footer1_flag, footer2_flag, image_flag).then((res) => {
                 console.log(res)
                 getAllReceiptSetting().then(res => {
@@ -47,6 +48,9 @@ function getReceiptSettings() {
         }).catch(error => {
             if (error.message == "Request failed with status code 500") { }
             console.error("errror issssss from receipt settings ", error)
+            console.log(error.respons);
+            console.log(error.response);
+            console.log(error.response);
         })
     }
 

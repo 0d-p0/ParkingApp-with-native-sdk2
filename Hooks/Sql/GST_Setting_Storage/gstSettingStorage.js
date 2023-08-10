@@ -63,7 +63,7 @@ function gstSettingStorage() {
 
     const storeGSTSettings = async (data) => {
         const db = await getDatabaseConnection()
-        const { gst_id, subclient_id, gst_flag, gst_type, gst_number, cgst, sgst, created_by, updated_by, created_at, updated_at } = data
+        const { gst_id, subclient_id, gst_flag, gst_type, gst_number, cgst, sgst, created_by, updated_by, created_at, updated_at } = data ||{}
         await deleteAllGSTSettings()
         return new Promise((resolve, reject) => {
             db.transaction(

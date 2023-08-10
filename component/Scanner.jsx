@@ -28,7 +28,7 @@ const Scanner = ({ navigation }) => {
   const [scanning, setScanning] = useState(true);
   const [on, setOn] = useState(false);
   // Get GST Settings
-  const { gstSettings } = gstSettingsController()
+  const { handleGetGstSettingsFromStorage } = gstSettingsController()
 
   // const entrydate = new Date(data?.[0]?.time || data?.[0]?.date_time_in);
 
@@ -164,7 +164,8 @@ const Scanner = ({ navigation }) => {
       result.date_time_in,
       result.date_time_out,
     );
-
+    const gstSettings = await handleGetGstSettingsFromStorage()
+    console.log(gstSettings)
     console.log('--------------price --------------', price);
     const totalDuration = calculateDuration(timestamp, date.getTime());
     const gstPrice = GstPriceCalculator(gstSettings, price)

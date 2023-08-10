@@ -39,9 +39,8 @@ const OutpassScreen = ({ navigation }) => {
   const { retrieveAuthUser } = getAuthUser();
   const isOnline = useContext(InternetStatusContext);
   // Get GST Settings
-  const { gstSettings } = gstSettingsController()
+  const { handleGetGstSettingsFromStorage } = gstSettingsController()
 
-  console.log(" ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++", gstSettings)
   // dev_mod = "F"
   const [modalVisible, setModalVisible] = useState(false);
 
@@ -203,9 +202,13 @@ const OutpassScreen = ({ navigation }) => {
     //   data?.[0]?.date_time_out,
     // );
     // console.log(price);
-
+    const gstSettings = await handleGetGstSettingsFromStorage()
+    console.log(gstSettings)
     const totalDuration = calculateDuration(timestamp, date.getTime());
-    const gstPrice = GstPriceCalculator(gstSettings, price)
+    let gstPrice;
+    if (gstSettings && gstSettings?.gst_flag == "1") {
+      gstPrice = GstPriceCalculator(gstSettings, price)
+    }
     svp(price);
     console.log(price)
 

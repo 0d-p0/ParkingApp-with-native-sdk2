@@ -42,6 +42,8 @@ import increaseReceiptNo from '../../Hooks/Receipt/increaseReceiptNo';
 import bill from './bill.jpg'
 import advancePriceStorage from '../../Hooks/Sql/AdvancePricesStorage/advancePriceStorage';
 import gstSettingsController from '../../Hooks/Controller/GST_Settings/gstSettingsController';
+import fixedPriceController from '../../Hooks/Controller/FIxedPrice/fixedPriceController';
+import fixedPriceStorage from '../../Hooks/Sql/FixedPriceStore/fixedPriceStorage';
 
 const ReceiptScreen = ({ navigation }) => {
   const MyNativeModule = NativeModules.MyPrinter;
@@ -52,12 +54,13 @@ const ReceiptScreen = ({ navigation }) => {
 
   const [vechicles, setVechicles] = useState();
   // GST SETTINGS
-  gstSettingsController()
+  const { handleGetGstSettingsFromServer } = gstSettingsController()
   // setter and getter current time
   const [currentTime, setCurrentTime] = useState(new Date());
 
   const { calculateTotalAmount, calculateTotalVehicleIn, calculateTotalVehicleOut, getAllInVehicles, getAllOutVehicles, updateIsUploadedINById, updateIsUploadedOUTById } = VehicleInOutStore()
   const { getAdvancePricesByVehicleId } = advancePriceStorage()
+  const { getFixedPricesByVehicleId } = fixedPriceStorage()
   const [totalAmount, setTotalAmount] = useState()
   const [totalVehicleIn, setTotalVehicleIn] = useState()
   const [totalVehicleOut, setTotalVehicleOut] = useState()
@@ -308,11 +311,14 @@ const ReceiptScreen = ({ navigation }) => {
   // UPDATE VEHICLE RATES IN EVERY NEW RENDER IF ONLONE
   const { handleGetAllVehiclesRates } = getVehiclePrices()
   const { handleGetAllAdvancePrices } = getAdvancePrices()
+  const { handleGetAllFixedPrices } = fixedPriceController()
   const updateVehicleRates = async (token, sub_client_id) => {
     if (isOnline) {
       await handleGetAllVehiclesRates(token, sub_client_id)
       // if(generalSetting.dev_mod == "A")
       await handleGetAllAdvancePrices(token, sub_client_id)
+      await handleGetAllFixedPrices(token, sub_client_id)
+      await handleGetGstSettingsFromServer()
     }
 
   }
@@ -408,9 +414,9 @@ const ReceiptScreen = ({ navigation }) => {
 
   const handleNavigation = async (props) => {
     const result = await getVehicleRatesByVehicleId(props.vehicle_id);
+    alert(true && false)
 
-
-    if (result.length == 0) {
+    if (result.length == 0 && generalSetting?.dev_mod != "F") {
       ToastAndroid.showWithGravityAndOffset(
         'Vehicle Rate Not available contact owner',
         ToastAndroid.LONG,
@@ -423,7 +429,6 @@ const ReceiptScreen = ({ navigation }) => {
     let advancePrice = false;
     if (generalSetting.adv_pay == "Y") {
       advancePrice = await getAdvancePricesByVehicleId(props.vehicle_id)
-      alert(JSON.stringify(advancePrice))
       if (advancePrice.length == 0) {
         ToastAndroid.showWithGravityAndOffset(
           'Advance price Not available contact owner',
@@ -435,7 +440,21 @@ const ReceiptScreen = ({ navigation }) => {
         return
       }
     }
-
+    let fixedPrice = false;
+    if (generalSetting?.dev_mod == "F") {
+      fixedPrice = await getFixedPricesByVehicleId(props.vehicle_id)
+      alert(JSON.stringify(fixedPrice))
+      if (fixedPrice.length == 0) {
+        ToastAndroid.showWithGravityAndOffset(
+          'Fixed price Not available contact owner',
+          ToastAndroid.LONG,
+          ToastAndroid.CENTER,
+          25,
+          50,
+        )
+        return
+      }
+    }
     navigation.navigate('create_receipt', {
       type: props.vehicle_name,
       id: props.vehicle_id,
@@ -444,7 +463,8 @@ const ReceiptScreen = ({ navigation }) => {
       receiptNo: receiptNo,
       currentDayTotalReceipt: totalVehicleIn,
       imei_no: userDetails?.imei_no,
-      advanceData: advancePrice[0]
+      advanceData: advancePrice,
+      fixedPriceData: fixedPrice
     });
   }
 

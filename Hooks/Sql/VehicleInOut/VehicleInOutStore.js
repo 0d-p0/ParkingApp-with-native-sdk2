@@ -103,9 +103,10 @@ function VehicleInOutStore() {
               if (resultSet.rows.length > 0) {
                 // Update existing record
                 tx.executeSql(
-                  'UPDATE vehicleInOutTable SET date_time_out = ?, user_id_out = ?, mc_srl_no_out = ?, duration = ?, paid_amt = ?, isUploadedOUT = ?, base_amt = ?,cgst = ?,sgst = ? WHERE vehicle_no = ? AND date_time_in = ?',
+                  'UPDATE vehicleInOutTable SET date_time_out = ?, user_id_out = ?, mc_srl_no_out = ?, duration = ?, paid_amt = ?, isUploadedOUT = ?, gst_flag ?, base_amt = ?,cgst = ?,sgst = ? WHERE vehicle_no = ? AND date_time_in = ?',
                   [
-                    date_time_out, user_id_out, mc_srl_no_out, duration, paid_amt, isUploadedOUT, base_amt, cgst, sgst, vehicle_no, date_time_in,
+                    date_time_out, user_id_out, mc_srl_no_out, duration, paid_amt, isUploadedOUT,
+                    gst_flag,base_amt, cgst, sgst, vehicle_no, date_time_in,
                   ],
                   (_, updateResultSet) => {
                     console.warn('vehicle in data updated');

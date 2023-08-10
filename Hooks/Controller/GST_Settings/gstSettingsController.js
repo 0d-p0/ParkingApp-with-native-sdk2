@@ -21,7 +21,9 @@ export default function gstSettingsController() {
     }
 
     async function handleGetGstSettingsFromServer() {
-
+        if (!isOnline) {
+            return
+        }
         const token = await retrieveAuthUser()
         const user = await getUserByToken(token)
         try {
@@ -49,20 +51,14 @@ export default function gstSettingsController() {
 
     async function handleGetGstSettingsFromStorage() {
         try {
-            getAllGstSettings().then((response) => {
-                // console.log("AAAAAAAAAAAAAAAAAAAAAAAAAAAAA", response)
-                setGstSettings(response)
-            }).catch(error => {
-                console.error(error)
-            })
+            const result = getAllGstSettings()
+            return result
         } catch (error) {
             console.error("some error ocur", error)
         }
     }
     // console.log(" ===========   ================= ",gstSettings)
 
-    useEffect(() => {
-        handleGetGstSettings()
-    }, [])
-    return { gstSettings }
+
+    return { handleGetGstSettingsFromServer, handleGetGstSettingsFromStorage }
 }

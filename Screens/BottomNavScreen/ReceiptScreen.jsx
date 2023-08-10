@@ -48,7 +48,7 @@ const ReceiptScreen = ({ navigation }) => {
 
   const isOnline = useContext(InternetStatusContext);
   const isFoccused = useIsFocused()
-  const { generalSetting } = useContext(AuthContext)
+  const { generalSetting, logOut } = useContext(AuthContext)
 
   const [vechicles, setVechicles] = useState();
   // GST SETTINGS
@@ -65,7 +65,7 @@ const ReceiptScreen = ({ navigation }) => {
 
   const [receiptNo, setReceiptNo] = useState(null)
 
-  const { getUserByToken } = storeUsers();
+  const { getUserByToken, deleteUserById } = storeUsers();
   const { retrieveAuthUser } = getAuthUser();
   const { getVechiclesData } = getVechicles(setVechicles);
   const { getVehicleRatesByVehicleId } = vehicleRatesStorage()
@@ -339,16 +339,29 @@ const ReceiptScreen = ({ navigation }) => {
   }
   async function checkUserIsAvailable() {
     if (isOnline && userDetails) {
-      console.log(`${address.isUser}?user_id=${userDetails?.user_id}`)
-
+      // console.log(`${address.isUser}?user_id=${userDetails?.user_id}`)
       try {
-        const res = await axios.get(`${address.isUser}?user_id=${userDetails?.user_id}`)
-        console.log("_____________________DDDDDDDDDDDD_______________________", res.data)
+        const res = await axios.get(`${address.isUser}?user_id=${userDetails?.user_id}`, {
+          headers: {
+            Authorization: `Bearer ${userDetails?.token}`,
+          }
+        })
+        if (res?.data?.data == 0) {
+          alert("please login again \n no User found")
+          await deleteUserById(userDetails?.user_id)
+          return logOut()
+        }
+        console.log("_____________________IS USER AUTH_______________________", res.data)
       } catch (error) {
         if (error.response) {
           // The client was given an error response (5xx, 4xx)
           console.log(error.response.data);
           console.log(error.response.status);
+          if (error.response.status == 401) {
+            await deleteUserById(userDetails?.user_id)
+            alert("please login again \n no User found")
+            return logOut()
+          }
           console.log(error.response.headers);
         } else if (error.request) {
           // The client never received a response, and the request was never left
@@ -366,9 +379,11 @@ const ReceiptScreen = ({ navigation }) => {
     // dashboardDAta();
   }, [isOnline]);
   useEffect(() => {
-    checkUserIsAvailable()
+    if (isFoccused) {
+      checkUserIsAvailable()
+    }
 
-  }, [isOnline, userDetails])
+  }, [isOnline, userDetails, isFoccused])
   useEffect(() => {
     if (isFoccused) {
       calculateTotalAmount().then(res => { setTotalAmount(res) }).catch(err => console.error(err))

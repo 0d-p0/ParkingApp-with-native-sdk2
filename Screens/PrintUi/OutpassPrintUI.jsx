@@ -1,4 +1,4 @@
-import { StyleSheet, Text, View, PixelRatio, ToastAndroid, ActivityIndicator, PermissionsAndroid } from 'react-native';
+import { StyleSheet, Text, View, PixelRatio, ToastAndroid, ActivityIndicator, PermissionsAndroid, ScrollView } from 'react-native';
 import React, { useContext, useEffect, useState } from 'react';
 import allColor from '../../Resources/Colors/Color';
 import CustomButtonComponent from '../../component/CustomButtonComponent';
@@ -17,9 +17,9 @@ import ReceiptImageStorage from '../../Hooks/Sql/Receipt Setting Storage/Receipt
 
 const OutpassPrintUI = ({ route, navigation }) => {
   // Extract data and others from the route params  
-  const { data, others } = route.params;
+  const { data, others, gstSettings } = route.params;
 
-  console.log("----------------------", data)
+  console.log("----------------------", gstSettings)
 
   // helper Function to get Current user, which store in offline using SqlLite.
   const { getUserByToken } = storeUsers()
@@ -142,7 +142,8 @@ const OutpassPrintUI = ({ route, navigation }) => {
 
     // call this below function
     await handleStoreOrUploadCarOut();
-
+    // setLoading(false)
+    // return
 
     try {
       // payload variable holds all the texts.
@@ -158,7 +159,7 @@ const OutpassPrintUI = ({ route, navigation }) => {
       if (receiptSettings.header2_flag == "1") {
         payload += `[c]${receiptSettings.header2}\n`
       }
-    
+
       payload += `[C]<B><font size='big'>---------------</font>\n`
 
       data.forEach((item) => {
@@ -234,10 +235,10 @@ const OutpassPrintUI = ({ route, navigation }) => {
         payload += `[c]${receiptSettings.header2}\n`
       }
 
-      payload += `[C]<B><font size='big'>---------------</font>\n` +
-        data.forEach((item) => {
-          payload += `[L]<b> ${item.label} : ${item.value}\n`
-        })
+      payload += `[C]<B><font size='big'>---------------</font>\n` 
+      data.forEach((item) => {
+        payload += `[L]<b> ${item.label} : ${item.value}\n`
+      })
 
       if (receiptSettings.footer1_flag == "1") {
         payload += `[C] ${receiptSettings.footer1} \n`
@@ -248,6 +249,7 @@ const OutpassPrintUI = ({ route, navigation }) => {
       }
       // this function start the printing
       // this is an external package
+     
       await ThermalPrinterModule.printBluetooth({
         payload: payload
         ,
@@ -271,12 +273,21 @@ const OutpassPrintUI = ({ route, navigation }) => {
     const item = array.find(item => item.label === label);
     return item ? item.value : null;
   };
-  
+
 
   // It`s handle the upload and offline storing of vehicle data.
   const handleStoreOrUploadCarOut = async () => {
     const PARKING_FEES = findValueByLabel(data, "PARKING FEES");
-    
+    let cgst = 0
+    let sgst = 0;
+    let base_amt = PARKING_FEES
+    let isGst = "N"
+    if (gstSettings && gstSettings?.gst_flag == "1") {
+      isGst = "Y"
+      cgst = findValueByLabel(data, "CGST")
+      sgst = findValueByLabel(data, "SGST")
+      base_amt = findValueByLabel(data, "BASE AMOUNT")
+    }
     // store return data into token variable
     const token = await retrieveAuthUser();
     // store return data into user variable
@@ -298,10 +309,13 @@ const OutpassPrintUI = ({ route, navigation }) => {
         date_time_out: others?.date_time_out,
         user_id_out: others?.userId || user?.id,
         paid_amt: PARKING_FEES,
-        gst_flag: 'Y',
+        gst_flag: isGst,
         duration: 0,
         mc_srl_no_out: user?.imei_no,
-        mc_srl_no: others?.mc_srl_no
+        mc_srl_no: others?.mc_srl_no,
+        cgst: cgst,
+        sgst: sgst,
+        base_amt: base_amt
       })
     }
 
@@ -317,22 +331,24 @@ const OutpassPrintUI = ({ route, navigation }) => {
         date_time_out: others?.date_time_out,
         user_id_out: others.userId || user?.id,
         paid_amt: PARKING_FEES,
-        gst_flag: 'N',
+        gst_flag: isGst,
         duration: 0,
         mc_srl_no_out: user?.imei_no,
         advance: others.advance,
-        mc_srl_no: others.mc_srl_no
+        mc_srl_no: others.mc_srl_no,
+        cgst: cgst,
+        sgst: sgst,
+        base_amt: base_amt
       })
     }
     console.log("----------------------data 2 -----------------------", data2)
     // setLoading(false)
     // return
-
     // if no internet connection then its store data localy
     if (!isOnline) {
       await createOrUpdateVehicleInOut(
         others.receiptNo, others.vehicleType, others.vehicle_id, others.receipt_type,
-        others.vehicle_no, others.date_time_in, others.oprn_mode, user.name, others.user_id_in, others.mc_srl_no, others.date_time_out, user.user_id,PARKING_FEES, "Y", 0, user?.imei_no, others.advance, others.isUploadedIN, false
+        others.vehicle_no, others.date_time_in, others.oprn_mode, user.name, others.user_id_in, others.mc_srl_no, others.date_time_out, user.user_id, PARKING_FEES, isGst, 0, user?.imei_no, others.advance, others.isUploadedIN, false, base_amt, cgst, sgst
       )
       ToastAndroid.showWithGravity(
         'car out data store in offfline',
@@ -357,7 +373,7 @@ const OutpassPrintUI = ({ route, navigation }) => {
       );
       await createOrUpdateVehicleInOut(
         others.receiptNo, others.vehicleType, others.vehicle_id, others.receipt_type,
-        others.vehicle_no, others.date_time_in, others.oprn_mode, user.name, others.user_id_in, others.mc_srl_no, others.date_time_out, user.user_id, PARKING_FEES, "Y", 0, user?.imei_no, others.advance, others.isUploadedIN, false
+        others.vehicle_no, others.date_time_in, others.oprn_mode, user.name, others.user_id_in, others.mc_srl_no, others.date_time_out, user.user_id, PARKING_FEES, isGst, 0, user?.imei_no, others.advance, others.isUploadedIN, false, base_amt, cgst, sgst
       )
       // await addOutpassEntry(data2);
     }
@@ -368,7 +384,7 @@ const OutpassPrintUI = ({ route, navigation }) => {
     if (res.status == 200) {
       createOrUpdateVehicleInOut(
         others.receiptNo, others.vehicleType, others.vehicle_id, others.receipt_type,
-        others.vehicle_no, others.date_time_in, others.oprn_mode, user.name, others.user_id_in, others.mc_srl_no, others.date_time_out, user.user_id, PARKING_FEES, "Y", 0, user?.imei_no, others.advance, others.isUploadedIN, true
+        others.vehicle_no, others.date_time_in, others.oprn_mode, user.name, others.user_id_in, others.mc_srl_no, others.date_time_out, user.user_id, PARKING_FEES, isGst, 0, user?.imei_no, others.advance, others.isUploadedIN, true, base_amt, cgst, sgst
       )
       ToastAndroid.showWithGravity(
         'car out data upload successfully',
@@ -403,52 +419,54 @@ const OutpassPrintUI = ({ route, navigation }) => {
       )}
       {/* render custom header */}
       <CustomHeader title={'Printer Preview'} />
+      <ScrollView>
 
-      {/* render printer preview and action buttons */}
-      <View style={{ padding: PixelRatio.roundToNearestPixel(15) }}>
-        {/* data  loop run below */}
-        {data &&
-          data.map((props, index) => (
-            <View key={index}>
-              <View style={styles.inLineTextContainer}>
-                <Text style={styles.text}>{props?.label}</Text>
-                <Text style={styles.text}> : {props?.value}</Text>
+        {/* render printer preview and action buttons */}
+        <View style={{ padding: PixelRatio.roundToNearestPixel(15) }}>
+          {/* data  loop run below */}
+          {data &&
+            data.map((props, index) => (
+              <View key={index}>
+                <View style={styles.inLineTextContainer}>
+                  <Text style={styles.text}>{props?.label}</Text>
+                  <Text style={styles.text}> : {props?.value}</Text>
+                </View>
+                <View
+                  style={{
+                    borderBottomColor: 'black',
+                    borderBottomWidth: StyleSheet.hairlineWidth,
+                  }}
+                />
               </View>
-              <View
-                style={{
-                  borderBottomColor: 'black',
-                  borderBottomWidth: StyleSheet.hairlineWidth,
-                }}
-              />
-            </View>
-          ))}
+            ))}
 
-        {/* render action buttons */}
-        <View
-          style={{
-            flexDirection: 'row',
-            justifyContent: 'space-between',
-            marginTop: PixelRatio.roundToNearestPixel(10),
-          }}>
-          {/* render goback button */}
-          <CustomButtonComponent.CancelButton
-            title={'Cancel'}
-            onAction={() => {
-              navigation.goBack();
-            }}
-            style={{ flex: 1, marginRight: PixelRatio.roundToNearestPixel(8) }}
-          />
+          {/* render action buttons */}
+          <View
+            style={{
+              flexDirection: 'row',
+              justifyContent: 'space-between',
+              marginTop: PixelRatio.roundToNearestPixel(10),
+            }}>
+            {/* render goback button */}
+            <CustomButtonComponent.CancelButton
+              title={'Cancel'}
+              onAction={() => {
+                navigation.goBack();
+              }}
+              style={{ flex: 1, marginRight: PixelRatio.roundToNearestPixel(8) }}
+            />
 
-          {/*  render printing button */}
-          <CustomButtonComponent.GoButton
-            title={'Print Receipt'}
-            onAction={() => {
-              handlePrintReceipt();
-            }}
-            style={{ flex: 1, marginLeft: PixelRatio.roundToNearestPixel(8) }}
-          />
+            {/*  render printing button */}
+            <CustomButtonComponent.GoButton
+              title={'Print Receipt'}
+              onAction={() => {
+                handlePrintReceipt();
+              }}
+              style={{ flex: 1, marginLeft: PixelRatio.roundToNearestPixel(8) }}
+            />
+          </View>
         </View>
-      </View>
+      </ScrollView>
     </>
   );
 };

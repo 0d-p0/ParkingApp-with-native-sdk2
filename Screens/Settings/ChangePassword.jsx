@@ -21,9 +21,9 @@ const ChangePassword = ({ navigation }) => {
   const { handleChangePassword } = changePasswordController();
   // state to store user details
   const [userDetails, setUserDetails] = useState();
-    // state to store  password
+  // state to store  password
   const [password, changePassword] = useState('');
-    // state to store Confirm password
+  // state to store Confirm password
   const [confirmPassword, chaneConfirmPassword] = useState('');
 
 
@@ -45,7 +45,7 @@ const ChangePassword = ({ navigation }) => {
 
   return (
     <>
-    {/* Render Heade */}
+      {/* Render Heade */}
       <CustomHeader title={'Change Password'} navigation={navigation} />
       <View style={styles.container}>
         <ScrollView>
@@ -132,16 +132,17 @@ const ChangePassword = ({ navigation }) => {
                   <CustomButtonComponent.GoButton
                     title={'change Password'}
                     onAction={() =>
-                      password && confirmPassword
-                        ? handleChangePassword(
-                          userDetails.user_id,
-                          userDetails.name,
-                          password,
-                        ).then(() => {
-                          changePassword('')
-                          chaneConfirmPassword('')
-                        })
-                        : alert('please enter  password')
+                      (password && confirmPassword) ? (
+                        password == confirmPassword
+                          ? handleChangePassword(
+                            userDetails.user_id,
+                            userDetails.name,
+                            password,
+                          ).then(() => {
+                            changePassword('')
+                            chaneConfirmPassword('')
+                          })
+                          : alert('password does not match ')) : alert('please enter  password')
                     }
                   />
                 </View>

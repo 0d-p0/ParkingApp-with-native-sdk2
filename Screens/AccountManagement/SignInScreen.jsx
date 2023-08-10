@@ -20,7 +20,7 @@ import DeviceInfo from 'react-native-device-info';
 
 const SignInScreen = ({ navigation }) => {
   const [text, onChangeText] = useState('7319328962');
-  const [password, onChangePassword] = useState('123456789');
+  const [password, onChangePassword] = useState('7319328962');
   const [deviceId, SetDeviceId] = useState('')
   const { login } = useContext(AuthContext);
 

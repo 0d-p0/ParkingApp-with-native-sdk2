@@ -71,8 +71,13 @@ export const AuthProvider = ({ children }) => {
   const offlineLogin = async (mobile, password) => {
     setLoading(true);
     const user = await getStoreUserData(mobile);
+    console.log("______________ 0000000000000000000 _________________", user)
     if (!user) {
-
+      ToastAndroid.showWithGravity(
+        'NO User Found With this id',
+        ToastAndroid.SHORT,
+        ToastAndroid.CENTER,
+      );
       setLoading(false);
       return;
     }
@@ -102,8 +107,8 @@ export const AuthProvider = ({ children }) => {
         // console.log("__________________________________________________<>",res)
         setLoading(true);
         const data = res.data;
-        if(!data){
-        return  ToastAndroid.showWithGravity(
+        if (!data) {
+          return ToastAndroid.showWithGravity(
             'server issue',
             ToastAndroid.LONG,
             ToastAndroid.TOP,
@@ -112,16 +117,16 @@ export const AuthProvider = ({ children }) => {
 
         const location = data?.location?.[0]?.loction
         const companyname = data?.subclient?.[0]?.sub_client_name
-        
-        if(!location){
-          return  ToastAndroid.showWithGravity(
+
+        if (!location) {
+          return ToastAndroid.showWithGravity(
             'location not found',
             ToastAndroid.LONG,
             ToastAndroid.TOP,
           );
         }
-        if(!companyname){
-          return  ToastAndroid.showWithGravity(
+        if (!companyname) {
+          return ToastAndroid.showWithGravity(
             'subclient not found',
             ToastAndroid.LONG,
             ToastAndroid.TOP,
@@ -145,8 +150,8 @@ export const AuthProvider = ({ children }) => {
             .then(() => {
               // ADD NEW USER
               addNewUserData(data?.user, data.token, location, companyname)
-                .then(async() => {
-                 await handleGetAllVehiclesRates(data.token, data.user.sub_client_id)
+                .then(async () => {
+                  await handleGetAllVehiclesRates(data.token, data.user.sub_client_id)
                   setIslogin(data.status);
                   storeUser(data.token);
                   setLoading(false);
@@ -168,7 +173,7 @@ export const AuthProvider = ({ children }) => {
                 });
             })
             .catch(err => {
-              
+
               console.log(err);
               // alert(err);
             });

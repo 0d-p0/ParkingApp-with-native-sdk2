@@ -1,5 +1,6 @@
 import React, { useEffect } from 'react'
 import getDatabaseConnection from '../getDatabaseConnection';
+import addColumnIfNeeded from '../IsColumn';
 
 function VehicleInOutStore() {
   const createVehicleInOutTable = async () => {
@@ -12,6 +13,10 @@ function VehicleInOutStore() {
         // error => console.error('Error creating vehicleInOutTable : ', error)
       );
     });
+
+    await addColumnIfNeeded(db, "vehicleInOutTable", "base_amt")
+    await addColumnIfNeeded(db, "vehicleInOutTable", "cgst")
+    await addColumnIfNeeded(db, "vehicleInOutTable", "sgst")
   }
 
   const createVehicleInOut = async (receiptNo,
@@ -55,13 +60,13 @@ function VehicleInOutStore() {
 
 
   const createOrUpdateVehicleInOut = async (receiptNo,
-    vehicleType, vehicle_id, receipt_type, vehicle_no, date_time_in, oprn_mode, opratorName, user_id_in, mc_srl_no, date_time_out, user_id_out, paid_amt, gst_flag, duration, mc_srl_no_out, advance, isUploadedIN, isUploadedOUT
+    vehicleType, vehicle_id, receipt_type, vehicle_no, date_time_in, oprn_mode, opratorName, user_id_in, mc_srl_no, date_time_out, user_id_out, paid_amt, gst_flag, duration, mc_srl_no_out, advance, isUploadedIN, isUploadedOUT, base_amt, cgst, sgst
   ) => {
 
     const db = await getDatabaseConnection()
 
     return new Promise((resolve, reject) => {
-      console.log("hello all data  -------------------------------------------------------", receiptNo, vehicleType, vehicle_id, receipt_type, vehicle_no, date_time_in, oprn_mode, opratorName, user_id_in, mc_srl_no, paid_amt, gst_flag, advance, date_time_out, user_id_out, duration, paid_amt)
+      // console.log("hello all data  -------------------------------------------------------", receiptNo, vehicleType, vehicle_id, receipt_type, vehicle_no, date_time_in, oprn_mode, opratorName, user_id_in, mc_srl_no, paid_amt, gst_flag, advance, date_time_out, user_id_out, duration, paid_amt)
 
       //       4 bus 4 S POL2 2023-06-30T07:45:57.220Z D pritam pritam 
       // 0300221120152387 100 Y 0 2023-06-30T09:00:32.102Z 8318930255 0 100
@@ -98,9 +103,9 @@ function VehicleInOutStore() {
               if (resultSet.rows.length > 0) {
                 // Update existing record
                 tx.executeSql(
-                  'UPDATE vehicleInOutTable SET date_time_out = ?, user_id_out = ?, mc_srl_no_out = ?, duration = ?, paid_amt = ?, isUploadedOUT = ? WHERE vehicle_no = ? AND date_time_in = ?',
+                  'UPDATE vehicleInOutTable SET date_time_out = ?, user_id_out = ?, mc_srl_no_out = ?, duration = ?, paid_amt = ?, isUploadedOUT = ?, base_amt = ?,cgst = ?,sgst = ? WHERE vehicle_no = ? AND date_time_in = ?',
                   [
-                    date_time_out, user_id_out, mc_srl_no_out, duration, paid_amt, isUploadedOUT, vehicle_no, date_time_in
+                    date_time_out, user_id_out, mc_srl_no_out, duration, paid_amt, isUploadedOUT, base_amt, cgst, sgst, vehicle_no, date_time_in,
                   ],
                   (_, updateResultSet) => {
                     console.warn('vehicle in data updated');
@@ -114,10 +119,11 @@ function VehicleInOutStore() {
               } else {
                 // Insert new record
                 tx.executeSql(
-                  'INSERT INTO vehicleInOutTable (receiptNo, vehicleType, vehicle_id,  receipt_type, vehicle_no, date_time_in, oprn_mode, opratorName, user_id_in, mc_srl_no, date_time_out, user_id_out, paid_amt, gst_flag, duration, mc_srl_no_out, advance, isUploadedIN,isUploadedOUT) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,?, ?, ?, ?, ?)',
+                  'INSERT INTO vehicleInOutTable (receiptNo, vehicleType, vehicle_id,  receipt_type, vehicle_no, date_time_in, oprn_mode, opratorName, user_id_in, mc_srl_no, date_time_out, user_id_out, paid_amt, gst_flag, duration, mc_srl_no_out, advance, isUploadedIN,isUploadedOUT,base_amt,cgst,sgst) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,?, ?, ?, ?, ?,?, ?, ?)',
                   [
                     receiptNo,
-                    vehicleType, vehicle_id, receipt_type, vehicle_no, date_time_in, oprn_mode, opratorName, user_id_in, mc_srl_no, date_time_out, user_id_out, paid_amt, gst_flag, duration, mc_srl_no_out, advance, isUploadedIN, isUploadedOUT
+                    vehicleType, vehicle_id, receipt_type, vehicle_no, date_time_in, oprn_mode, opratorName, user_id_in, mc_srl_no, date_time_out, user_id_out, paid_amt, gst_flag, duration, mc_srl_no_out, advance, isUploadedIN, isUploadedOUT,
+                    base_amt,cgst,sgst
                   ],
                   (_, insertResultSet) => {
                     console.warn('New vehicle in data stored while outpass');
@@ -343,7 +349,7 @@ function VehicleInOutStore() {
     const currentDate = new Date();
     const oneMonthAgo = new Date();
     oneMonthAgo.setMonth(oneMonthAgo.getMonth() - 1);
-  
+
     return new Promise((resolve, reject) => {
       db.transaction(
         tx => {
@@ -356,7 +362,7 @@ function VehicleInOutStore() {
               resolve(affectedRows);
             },
             (_, error) => {
-              console.warn("helloooo dele",error);
+              console.warn("helloooo dele", error);
               reject(error);
             },
           );

@@ -21,6 +21,27 @@ function loginController() {
 
     } catch (error) {
 
+      if (error.response) {
+        // The client was given an error response (5xx, 4xx)
+        console.log(error.response.data)
+        ToastAndroid.showWithGravity(
+          `${error.response.data.message}`,
+          ToastAndroid.SHORT,
+          ToastAndroid.CENTER,
+        );
+        return
+      } else if (error.request) {
+        // The client never received a response, and the request was never left
+        ToastAndroid.showWithGravity(
+          `${"Server is not Reachable"}`,
+          ToastAndroid.SHORT,
+          ToastAndroid.CENTER,
+        );
+        return
+      } else {
+        // Anything else
+      }
+
       // if (error.message == "Request failed with status code 401") {
       //   ToastAndroid.showWithGravity(
       //     'check user name and password',

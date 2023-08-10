@@ -174,7 +174,7 @@ const Scanner = ({ navigation }) => {
       label: 'RECEIPT NO',
       value: result.receiptNo,
     });
-    if (gstSettings) {
+    if (gstSettings && gstSettings?.gst_flag == "1") {
       vData.push({
         label: 'BASE AMOUNT',
         value: gstPrice.price,

@@ -33,12 +33,12 @@ export default function gstSettingsController() {
             await storeGSTSettings(result.data.data[0])
             setGstSettings(result.data.data[0])
         } catch (error) {
-            if (err.response) {
+            if (error.response) {
                 // The client was given an error response (5xx, 4xx)
-                console.log(err.response.data);
-                console.log(err.response.status);
-                console.log(err.response.headers);
-            } else if (err.request) {
+                console.log(error.response.data);
+                console.log(error.response.status);
+                console.log(error.response.headers);
+            } else if (error.request) {
                 // The client never received a response, and the request was never left
             } else {
                 // Anything else

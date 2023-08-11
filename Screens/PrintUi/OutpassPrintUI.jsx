@@ -19,7 +19,7 @@ const OutpassPrintUI = ({ route, navigation }) => {
   // Extract data and others from the route params  
   const { data, others, gstSettings } = route.params;
 
-  console.log("----------------------", gstSettings)
+  console.log("----------------------", others.date_time_out)
 
   // helper Function to get Current user, which store in offline using SqlLite.
   const { getUserByToken } = storeUsers()

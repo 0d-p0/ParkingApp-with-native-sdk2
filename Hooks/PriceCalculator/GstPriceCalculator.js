@@ -1,7 +1,7 @@
 import React from 'react'
 import gstSettingsController from '../Controller/GST_Settings/gstSettingsController'
 
-function GstPriceCalculator(gstSettings,parkingFees) {
+function GstPriceCalculator(gstSettings, parkingFees) {
     let price = 0;
     let CGST = 0;
     let SGST = 0;
@@ -40,6 +40,9 @@ function GstPriceCalculator(gstSettings,parkingFees) {
 
     totalPrice = price + CGST + SGST
     totalPrice = Math.ceil(totalPrice)
+    if (totalPrice > parkingFees && gstSettings.gst_type == "I") {
+        totalPrice = parkingFees
+    }
 
     return { price, CGST, SGST, totalPrice }
 }

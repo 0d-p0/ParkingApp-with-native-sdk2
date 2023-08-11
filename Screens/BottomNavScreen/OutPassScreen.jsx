@@ -74,7 +74,6 @@ const OutpassScreen = ({ navigation }) => {
   const { getDataByIdOrVehicleNumberStartsWith } = VehicleInOutStore();
 
   const getVehicleInfo = async number => {
-    GstPriceCalculator()
 
     try {
       if (number) {
@@ -235,24 +234,34 @@ const OutpassScreen = ({ navigation }) => {
         value: gstPrice.totalPrice,
       });
     }
-    if (!gstSettings) {
+    if (!gstSettings || gstSettings?.gst_flag == "0") {
       vData.push({
         label: 'PARKING FEES',
         value: price,
       });
     }
 
-
+    console.log(gstSettings)
     if (data?.[index].advance != '0') {
       vData.push({
         label: 'ADVANCE AMOUNT',
         value: data?.[index].advance,
       });
 
-      vData.push({
-        label: 'BALANCE AMOUNT',
-        value: price - data?.[index].advance,
-      });
+      if (gstSettings && gstSettings?.gst_flag == "1") {
+        vData.push({
+          label: 'BALANCE AMOUNT',
+          value: gstPrice.totalPrice - data?.[index].advance,
+        });
+      }
+
+      if (!gstSettings || gstSettings?.gst_flag == "0") {
+        vData.push({
+          label: 'BALANCE AMOUNT',
+          value: price - data?.[index].advance,
+        });
+
+      }
     }
     vData.push({
       label: 'VEHICLE TYPE',

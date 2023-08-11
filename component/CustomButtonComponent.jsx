@@ -1,4 +1,4 @@
-import { StyleSheet, Text, TouchableOpacity, PixelRatio } from 'react-native';
+import { StyleSheet, Text, TouchableOpacity, PixelRatio,Pressable } from 'react-native';
 import React from 'react';
 import allColor from '../Resources/Colors/Color';
 import normalize from 'react-native-normalize';

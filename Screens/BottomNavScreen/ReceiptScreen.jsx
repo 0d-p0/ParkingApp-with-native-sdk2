@@ -394,7 +394,7 @@ const ReceiptScreen = ({ navigation }) => {
   }, [isOnline, userDetails, isFoccused])
   useEffect(() => {
     if (isFoccused) {
-      calculateTotalAmount().then(res => { setTotalAmount(res) }).catch(err => console.error(err))
+      calculateTotalAmount().then(res => { setTotalAmount(Math.round(res*100)/100) }).catch(err => console.error(err))
       calculateTotalVehicleIn().then(res => setTotalVehicleIn(res)).catch(err => console.error(err))
       calculateTotalVehicleOut().then(res => setTotalVehicleOut(res)).catch(err => console.error(err))
     }
@@ -414,8 +414,6 @@ const ReceiptScreen = ({ navigation }) => {
 
   const handleNavigation = async (props) => {
     const result = await getVehicleRatesByVehicleId(props.vehicle_id);
-    alert(true && false)
-
     if (result.length == 0 && generalSetting?.dev_mod != "F") {
       ToastAndroid.showWithGravityAndOffset(
         'Vehicle Rate Not available contact owner',
@@ -427,7 +425,7 @@ const ReceiptScreen = ({ navigation }) => {
       return
     }
     let advancePrice = false;
-    if (generalSetting.adv_pay == "Y") {
+    if (generalSetting.adv_pay == "Y" && generalSetting?.dev_mod != "F") {
       advancePrice = await getAdvancePricesByVehicleId(props.vehicle_id)
       if (advancePrice.length == 0) {
         ToastAndroid.showWithGravityAndOffset(
@@ -443,7 +441,7 @@ const ReceiptScreen = ({ navigation }) => {
     let fixedPrice = false;
     if (generalSetting?.dev_mod == "F") {
       fixedPrice = await getFixedPricesByVehicleId(props.vehicle_id)
-      alert(JSON.stringify(fixedPrice))
+      // alert(JSON.stringify(fixedPrice))
       if (fixedPrice.length == 0) {
         ToastAndroid.showWithGravityAndOffset(
           'Fixed price Not available contact owner',

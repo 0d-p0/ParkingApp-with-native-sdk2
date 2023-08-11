@@ -38,6 +38,7 @@ const CreateReceipt = ({ navigation, route }) => {
   // check is Internet available or not
   const isOnline = useContext(InternetStatusContext);
 
+
   // loading when a vehicle in and prinout Process goes on
   const [loading, setLoading] = useState(false);
   const [pic, setPic] = useState()
@@ -346,16 +347,17 @@ const CreateReceipt = ({ navigation, route }) => {
       ];
 
       // store handleVehicleIn() return values in response
-      console.log(InData)
-      return
       const response = await handleVehicleIn(InData);
+      console.log("___________________ subham Da ___________________", InData)
+
       if (response.status === 200) {
+
         // if status  equal to 200 run below block
-        await Promise.all([createOrUpdateVehicleInOut(receiptNo, type, id, "S", vehicleNumber.toUpperCase(), currentTime.toISOString(), dev_mod, operatorName, userId, imei_no, null, null, gstPrice.totalPrice, isGst, null, null, 0, false, false, gstPrice.price, gstPrice.CGST, gstPrice.SGST), increaseReceiptNo(receiptNo), handlePrintReceipt(receiptNo, imei_no, true)])
+        await Promise.all([createOrUpdateVehicleInOut(receiptNo, type, id, "S", vehicleNumber.toUpperCase(), currentTime.toISOString(), dev_mod, operatorName, userId, imei_no, null, null, gstPrice.totalPrice, isGst, null, null, 0, false, false, gstPrice.price, gstPrice.CGST, gstPrice.SGST), increaseReceiptNo(receiptNo), handleFixedModePrintReceipt(receiptNo, isGst, gstPrice.totalPrice, gstPrice.CGST, gstPrice.SGST, gstPrice.price)])
 
         ToastAndroid.showWithGravity(
           'Uploaded',
-          ToastAndroid.SHORT,
+          ToastAndroid.LONG,
           ToastAndroid.CENTER,
         );
       } else {
@@ -455,11 +457,11 @@ const CreateReceipt = ({ navigation, route }) => {
       // store handleVehicleIn() return values in response
       const response = await handleVehicleIn(InData);
 
-      console.log(response)
 
       if (response.status === 200) {
         // if status  equal to 200 run below block
         // STORE,INCREASE RECEIPT NO and HANDLE PRINTOUT
+        console.warn("server ... ")
         await Promise.all([createVehicleInOut(receiptNo, type, id, "S", vehicleNumber.toUpperCase(), currentTime.toISOString(), "A", operatorName, userId, imei_no, 0, "Y", advancePrice[0].advance_amount, true), increaseReceiptNo(receiptNo), handleAdvancePrintReceipt(receiptNo, advancePrice[0].advance_amount, imei_no, true)
         ])
 
@@ -548,9 +550,9 @@ const CreateReceipt = ({ navigation, route }) => {
   // Handle FIXED PRICE print receipt
   const handleFixedModePrintReceipt = async (receiptNo, isGst, totalPrice, cgst, sgst, base_amt) => {
     // const result = await getVehicleRatesByVehicleId(id);
-    alert(isGst)
     try {
       let payload = `[C]<font size='tall'><B>RECEIPT</font>\n`
+
       if (pic) {
         payload += `[R]<img>${pic}</img>\n\n` + '\n'
       }
@@ -567,15 +569,14 @@ const CreateReceipt = ({ navigation, route }) => {
         `[L]<b>IN Time : ${formattedDateTime}\n`
 
       if (isGst == "Y") {
-        `[L]<b>BASE AMOUNT : ${base_amt}\n` +
+        payload += `[L]<b>BASE AMOUNT : ${base_amt}\n` +
           `[L]<b>CGST : ${cgst}\n` +
           `[L]<b>SGST : ${sgst}\n` +
           `[L]<b>PARKING FEES : ${totalPrice}\n\n`
       }
 
       if (isGst == "N") {
-
-        `[L]<b>PARKING FEES : ${totalPrice}\n\n`
+        payload += `[L]<b>PARKING FEES : ${totalPrice}\n\n`
       }
 
       if (receiptSettings.footer1_flag == "1") {
@@ -586,8 +587,7 @@ const CreateReceipt = ({ navigation, route }) => {
         payload += `[C]${receiptSettings.footer2} \n`
       }
 
-      console.log("__________________++++++++++++++++++++++++_________________________", payload)
-      return
+
       await ThermalPrinterModule.printBluetooth({
         payload: payload,
         printerNbrCharactersPerLine: 30,
@@ -672,13 +672,13 @@ const CreateReceipt = ({ navigation, route }) => {
       );
     }
 
-    if (adv_pay == 'Y') {
+    if (adv_pay == 'Y' && dev_mod != "F") {
       // if adv_pay is equal to Y then  below function will work
       // Y =  Yes , N = No
       await handelAdvanceOfflineCarIN()
     }
 
-    if (adv_pay != 'Y') {
+    if (adv_pay != 'Y' || dev_mod == "F") {
       // if adv_pay is Not equal to Y then  below function will work
       // Y =  Yes , N = No
       if (dev_mod == "F") {
@@ -763,7 +763,7 @@ const CreateReceipt = ({ navigation, route }) => {
           {/* ..........receipt type ........... */}
 
           {(advanceData || fixedPriceData) && <View style={{ marginTop: normalize(20) }}>
-            <Text style={{ ...styles.vehicle_text, color: 'red' }}> {advanceData && "Advance"} {fixedPriceData && "Fixed "} Price is On </Text>
+            <Text style={{ ...styles.vehicle_text, color: 'red' }}> { dev_mod == "F" ? "":advanceData  && "Advance"} {fixedPriceData && "Fixed "} Price is On </Text>
             <View
               style={{
                 marginLeft: normalize(10),
@@ -771,7 +771,7 @@ const CreateReceipt = ({ navigation, route }) => {
                 alignItems: 'center',
               }}>
               <Text style={{ ...styles.vehicle_text, color: 'red' }}>
-                Collect   ₹{advanceData?.[0]?.advance_amount || fixedPriceData?.[0].vehicle_rate}    rupees from customer
+                Collect   ₹{(dev_mod == "F" ? "" : advanceData?.[0]?.advance_amount) || fixedPriceData?.[0].vehicle_rate && " money"}   from customer
               </Text>
             </View>
           </View>}

@@ -148,7 +148,7 @@ const OperatorReport = ({ navigation }) => {
 
         const extractedData = unbilledData && unbilledData.map(({ opratorName, quantity, TotalAdvance, totalAmount }) => {
             // opratorName, quantity, TotalAdvance, totalAmount
-            return `${opratorName.padEnd(19)}${quantity.toString().padEnd(9)}${TotalAdvance.toString().padEnd(12)}${totalAmount}\n`
+            return `${opratorName?.toString().padEnd(19)}${quantity.toString().padEnd(9)}${TotalAdvance.toString().padEnd(12)}${totalAmount}\n`
         }).join('');
         // console.log("object ", extractedData)
         setpl(true)

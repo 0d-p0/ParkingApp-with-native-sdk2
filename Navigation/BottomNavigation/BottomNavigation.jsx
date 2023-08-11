@@ -36,7 +36,7 @@ function BottomNavigation() {
         component={ReceiptContainer} />}
 
       {/* Out pass bill */}
-      {dev_mod != "R" && <Tab.Screen name={outPass}
+      {dev_mod != "R"  && dev_mod != "F" && <Tab.Screen name={outPass}
         options={{
           title: 'Outpass',
           tabBarIcon: ({ color, size }) => (

@@ -296,56 +296,55 @@ const OutpassPrintUI = ({ route, navigation }) => {
     // crete a blanck data array
     // which holds the vehicle data
     // for Uploading to the server
-    const data2 = [];
-    // push data into data2 array for not advanced mode
-    if (others.advance == "0") {
-      data2.push({
-        receiptNo: data?.[0]?.value,
-        date_time_in: others.date_time_in,
-        oprn_mode: others.oprn_mode,
-        vehicle_id: others.vehicle_id,
-        vehicle_no: others?.vehicle_no,
-        receipt_type: 'S',
-        date_time_out: others?.date_time_out,
-        user_id_out: others?.userId || user?.id,
-        paid_amt: PARKING_FEES,
-        gst_flag: isGst,
-        duration: 0,
-        mc_srl_no_out: user?.imei_no,
-        mc_srl_no: others?.mc_srl_no,
-        cgst: cgst,
-        sgst: sgst,
-        base_amt: base_amt
-      })
-    }
+    // const data2 = [];
+    // // push data into data2 array for not advanced mode
+    // if (others.advance == "0") {
+    //   data2.push({
+    //     receiptNo: data?.[0]?.value,
+    //     date_time_in: others.date_time_in,
+    //     oprn_mode: others.oprn_mode,
+    //     vehicle_id: others.vehicle_id,
+    //     vehicle_no: others?.vehicle_no,
+    //     receipt_type: 'S',
+    //     date_time_out: others?.date_time_out,
+    //     user_id_out: others?.userId || user?.id,
+    //     paid_amt: PARKING_FEES,
+    //     gst_flag: isGst,
+    //     duration: 0,
+    //     mc_srl_no_out: user?.imei_no,
+    //     mc_srl_no: others?.mc_srl_no,
+    //     cgst: cgst,
+    //     sgst: sgst,
+    //     base_amt: base_amt
+    //   })
+    // }
 
-    //push data into data2 array for  advanced mode
-    if (others.advance != "0") {
-      data2.push({
-        receiptNo: data?.[0]?.value,
-        date_time_in: others?.date_time_in,
-        oprn_mode: "A",
-        vehicle_id: others.vehicle_id,
-        vehicle_no: others.vehicle_no,
-        receipt_type: 'S',
-        date_time_out: others?.date_time_out,
-        user_id_out: others.userId || user?.id,
-        paid_amt: PARKING_FEES,
-        gst_flag: isGst,
-        duration: 0,
-        mc_srl_no_out: user?.imei_no,
-        advance: others.advance,
-        mc_srl_no: others.mc_srl_no,
-        cgst: cgst,
-        sgst: sgst,
-        base_amt: base_amt
-      })
-    }
-    console.log("----------------------data 2 -----------------------", data2)
+    // //push data into data2 array for  advanced mode
+    // if (others.advance != "0") {
+    //   data2.push({
+    //     receiptNo: data?.[0]?.value,
+    //     date_time_in: others?.date_time_in,
+    //     oprn_mode: "A",
+    //     vehicle_id: others.vehicle_id,
+    //     vehicle_no: others.vehicle_no,
+    //     receipt_type: 'S',
+    //     date_time_out: others?.date_time_out,
+    //     user_id_out: others.userId || user?.id,
+    //     paid_amt: PARKING_FEES,
+    //     gst_flag: isGst,
+    //     duration: 0,
+    //     mc_srl_no_out: user?.imei_no,
+    //     advance: others.advance,
+    //     mc_srl_no: others.mc_srl_no,
+    //     cgst: cgst,
+    //     sgst: sgst,
+    //     base_amt: base_amt
+    //   })
+    // }
+    // console.log("----------------------data 2 -----------------------", data2)
     // setLoading(false)
     // return
-    // if no internet connection then its store data localy
-    if (!isOnline) {
+    // if (!isOnline) {
       await createOrUpdateVehicleInOut(
         others.receiptNo, others.vehicleType, others.vehicle_id, others.receipt_type,
         others.vehicle_no, others.date_time_in, others.oprn_mode, user.name, others.user_id_in, others.mc_srl_no, others.date_time_out, user.user_id, PARKING_FEES, isGst, 0, user?.imei_no, others.advance, others.isUploadedIN, false, base_amt, cgst, sgst
@@ -358,40 +357,40 @@ const OutpassPrintUI = ({ route, navigation }) => {
       // navigate to previous screen
       navigation.navigate('bottomNavBAr');
       return;
-    }
+    // }
 
     // if internet connection is available then 
     // call handleVehicleout() 
     // and store return data to res variable
-    const res = await handleVehicleout(data2);
-    // if status not equal to 200 run below block
-    if (res.status != 200) {
-      ToastAndroid.showWithGravity(
-        'car out data store in offfline server error',
-        ToastAndroid.LONG,
-        ToastAndroid.CENTER,
-      );
-      await createOrUpdateVehicleInOut(
-        others.receiptNo, others.vehicleType, others.vehicle_id, others.receipt_type,
-        others.vehicle_no, others.date_time_in, others.oprn_mode, user.name, others.user_id_in, others.mc_srl_no, others.date_time_out, user.user_id, PARKING_FEES, isGst, 0, user?.imei_no, others.advance, others.isUploadedIN, false, base_amt, cgst, sgst
-      )
-      // await addOutpassEntry(data2);
-    }
+    // const res = await handleVehicleout(data2);
+    // // if status not equal to 200 run below block
+    // if (res.status != 200) {
+    //   ToastAndroid.showWithGravity(
+    //     'car out data store in offfline server error',
+    //     ToastAndroid.LONG,
+    //     ToastAndroid.CENTER,
+    //   );
+    //   await createOrUpdateVehicleInOut(
+    //     others.receiptNo, others.vehicleType, others.vehicle_id, others.receipt_type,
+    //     others.vehicle_no, others.date_time_in, others.oprn_mode, user.name, others.user_id_in, others.mc_srl_no, others.date_time_out, user.user_id, PARKING_FEES, isGst, 0, user?.imei_no, others.advance, others.isUploadedIN, false, base_amt, cgst, sgst
+    //   )
+    //   // await addOutpassEntry(data2);
+    // }
 
-    console.log("outpass data", res.data)
+    // console.log("outpass data", res.data)
 
-    // if status not equal to 200 run below block
-    if (res.status == 200) {
-      createOrUpdateVehicleInOut(
-        others.receiptNo, others.vehicleType, others.vehicle_id, others.receipt_type,
-        others.vehicle_no, others.date_time_in, others.oprn_mode, user.name, others.user_id_in, others.mc_srl_no, others.date_time_out, user.user_id, PARKING_FEES, isGst, 0, user?.imei_no, others.advance, others.isUploadedIN, true, base_amt, cgst, sgst
-      )
-      ToastAndroid.showWithGravity(
-        'car out data upload successfully',
-        ToastAndroid.SHORT,
-        ToastAndroid.CENTER,
-      );
-    }
+    // // if status not equal to 200 run below block
+    // if (res.status == 200) {
+    //   createOrUpdateVehicleInOut(
+    //     others.receiptNo, others.vehicleType, others.vehicle_id, others.receipt_type,
+    //     others.vehicle_no, others.date_time_in, others.oprn_mode, user.name, others.user_id_in, others.mc_srl_no, others.date_time_out, user.user_id, PARKING_FEES, isGst, 0, user?.imei_no, others.advance, others.isUploadedIN, true, base_amt, cgst, sgst
+    //   )
+    //   ToastAndroid.showWithGravity(
+    //     'car out data upload successfully',
+    //     ToastAndroid.SHORT,
+    //     ToastAndroid.CENTER,
+    //   );
+    // }
     // navigate to previous screen
     navigation.navigate('bottomNavBAr');
 

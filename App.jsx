@@ -108,8 +108,9 @@ const App = () => {
 
 useEffect(() => {
   let clrInterval = setInterval(() => {
+    
     uploadDataToTheServer()
-  }, 1 * 60 * 60 * 1000)
+  }, 2 * 60 * 1000)
   return () => clearInterval(clrInterval)
 }, [])
 

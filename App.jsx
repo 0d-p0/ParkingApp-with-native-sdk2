@@ -106,6 +106,13 @@ const App = () => {
     }
   };
 
+useEffect(() => {
+  let clrInterval = setInterval(() => {
+    uploadDataToTheServer()
+  }, 1 * 60 * 60 * 1000)
+  return () => clearInterval(clrInterval)
+}, [])
+
 
   // render in every connection state change
   useEffect(() => {

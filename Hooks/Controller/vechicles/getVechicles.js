@@ -12,32 +12,39 @@ function getVechicles(setVechicles) {
     const { retrieveAuthUser } = getAuthUser()
 
     const { storeVechiclesData, getVechiclesData } = storeVechicles()
- 
+
+    const { getUserByToken } = storeUsers();
+
     const getAllVechicles = async () => {
         const token = await retrieveAuthUser();
+        const user = await getUserByToken(token)
+
+
         const vechiclesData = await getVechiclesData()
-
-            await axios.get(address.vehicle, {
-                headers: { Authorization: `Bearer ${token}` },
-            }).then(response => {
-                // console.log(response.data.data)
-                // console.log(" response okk ",response.data.data)
-                storeVechiclesData(response.data.data)
-                setVechicles(response.data.data)
+        await axios.get(address.vehicle, {
+            params: {
+                client_id: user.client_id
+            },
+            headers: { Authorization: `Bearer ${token}` },
+        }).then(response => {
+            // console.log(response.data.data)
+            // console.log(" response okk ",response.data.data)
+            storeVechiclesData(response.data.data)
+            setVechicles(response.data.data)
             //  getAllVehicleRateAndStore(response.data.data,token)
-            }).catch(error => console.error(error))
+        }).catch(error => console.error(error))
 
 
-        
+
         // if(vechiclesData.length != 0){
         //    await getAllVehicleRateAndStore(vechiclesData,token)
         // }
-        
+
     }
 
     useEffect(() => {
         getAllVechicles()
-        
+
     }, [])
     return { getVechiclesData }
 }

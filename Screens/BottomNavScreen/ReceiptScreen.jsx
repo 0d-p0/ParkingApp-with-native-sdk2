@@ -162,7 +162,7 @@ const ReceiptScreen = ({ navigation }) => {
       // Perform asynchronous operations here
       const token = await retrieveAuthUser();
       const user = await getUserByToken(token);
-      // console.log("user details", user)
+      console.log("user details", user)
       setUserDetails(user);
       await updateVehicleRates(token, user.sub_client_id)
 

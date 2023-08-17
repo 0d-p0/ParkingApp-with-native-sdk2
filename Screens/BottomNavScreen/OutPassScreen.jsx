@@ -180,6 +180,7 @@ const OutpassScreen = ({ navigation }) => {
     navigation.navigate('scanner');
   };
 
+
   const handleUploadOutPassData = async index => {
     const dateTimeString = data?.[index]?.date_time_in;
     const inDateFormat = new Date(dateTimeString);

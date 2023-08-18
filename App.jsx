@@ -36,7 +36,7 @@ const App = () => {
   };
 
   const uploadDataToTheServer = async () => {
-    console.log("----------------------upload to the server from APP -----------------")
+    console.log("----------------------upload to the server from APP every interval----------------- is online",isOnline)
     try {
       if (!isOnline) {
         return
@@ -49,6 +49,7 @@ const App = () => {
       if (inVehiledata.length != 0) {
         const token = await retrieveAuthUser();
         inVehiledata.forEach(async element => {
+          console.log("loop run ",element)
           const newVinData = [element]
           await axios
             .post(
@@ -106,19 +107,14 @@ const App = () => {
     }
   };
 
-useEffect(() => {
-  let clrInterval = setInterval(() => {
-    
-    uploadDataToTheServer()
-  }, 2 * 60 * 1000)
-  return () => clearInterval(clrInterval)
-}, [])
+
 
 
   // render in every connection state change
   useEffect(() => {
     const removeNetInfoSubscription = NetInfo.addEventListener(state => {
       const offline = state.isConnected && state.isInternetReachable;
+      console.log("hey pritam ...................",offline)
       setOnline(offline);
     });
     return () => removeNetInfoSubscription();
@@ -133,6 +129,14 @@ useEffect(() => {
     }
     
   }, [isOnline]);
+
+  useEffect(() => {
+    const clrInterval = setInterval(() => {
+      console.log("hey its running")
+      uploadDataToTheServer()
+    },15 * 60 * 1000)
+    return () => clearInterval(clrInterval)
+  }, [isOnline])
 
   useEffect(() => {
     const timeout = setTimeout(() => {

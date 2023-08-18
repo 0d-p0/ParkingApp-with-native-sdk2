@@ -12,7 +12,7 @@ import {
   NativeModules
 } from 'react-native';
 
-import React, { useContext, useEffect, useState } from 'react';
+import React, { useContext, useEffect, useRef, useState } from 'react';
 
 import axios from 'axios';
 
@@ -399,6 +399,15 @@ const ReceiptScreen = ({ navigation }) => {
       calculateTotalVehicleOut().then(res => setTotalVehicleOut(res)).catch(err => console.error(err))
     }
   }, [isFoccused]);
+
+  // const uploadButton = useRef()
+
+  // useEffect(() => {
+  //   let clrInterval = setInterval(() => {
+  //     uploadButton.click()
+  //   }, 2 * 60 * 1000)
+  //   return () => clearInterval(clrInterval)
+  // }, [])
 
   // reinitiate the current time and date
   useEffect(() => {

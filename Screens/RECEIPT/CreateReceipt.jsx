@@ -219,45 +219,45 @@ const CreateReceipt = ({ navigation, route }) => {
       handlePrintReceipt(receiptNo, imei_no, false)
       ])
       // if not online run below block 
-      if (isOnline) {
-// init InData with important values
-      // which are mandatory for uploading data to the server
-      const InData = [
-        {
-          receiptNo: receiptNo,
-          date_time_in: currentTime.toISOString(),
-          oprn_mode: dev_mod,
-          vehicle_id: id,
-          vehicle_no: vehicleNumber.toUpperCase(),
-          receipt_type: 'S',
-          mc_srl_no: imei_no,
-          gst_flag: "Y"
-        },
-      ];
+//       if (isOnline) {
+// // init InData with important values
+//       // which are mandatory for uploading data to the server
+//       const InData = [
+//         {
+//           receiptNo: receiptNo,
+//           date_time_in: currentTime.toISOString(),
+//           oprn_mode: dev_mod,
+//           vehicle_id: id,
+//           vehicle_no: vehicleNumber.toUpperCase(),
+//           receipt_type: 'S',
+//           mc_srl_no: imei_no,
+//           gst_flag: "Y"
+//         },
+//       ];
 
-      // store handleVehicleIn() return values in response
-      const response = await handleVehicleIn(InData);
-      // if (response.status === 200) {
-      //   // if status  equal to 200 run below block
-      //   await Promise.all([createVehicleInOut(receiptNo, type, id, "S", vehicleNumber.toUpperCase(), currentTime.toISOString(), dev_mod, operatorName, userId, imei_no, 0, "Y", 0, true), increaseReceiptNo(receiptNo), handlePrintReceipt(receiptNo, imei_no, true)])
+//       // store handleVehicleIn() return values in response
+//       const response = await handleVehicleIn(InData);
+//       // if (response.status === 200) {
+//       //   // if status  equal to 200 run below block
+//       //   await Promise.all([createVehicleInOut(receiptNo, type, id, "S", vehicleNumber.toUpperCase(), currentTime.toISOString(), dev_mod, operatorName, userId, imei_no, 0, "Y", 0, true), increaseReceiptNo(receiptNo), handlePrintReceipt(receiptNo, imei_no, true)])
 
-      //   ToastAndroid.showWithGravity(
-      //     'Uploaded',
-      //     ToastAndroid.SHORT,
-      //     ToastAndroid.CENTER,
-      //   );
-      // } else {
-      //   // if status not equal to 200 run below block
-      //   await Promise.all([createVehicleInOut(receiptNo, type, id, "S", vehicleNumber.toUpperCase(), currentTime.toISOString(), dev_mod, operatorName, userId, imei_no, 0, "Y", 0, false), increaseReceiptNo(receiptNo), handlePrintReceipt(receiptNo, imei_no, false)])
-      // }
+//       //   ToastAndroid.showWithGravity(
+//       //     'Uploaded',
+//       //     ToastAndroid.SHORT,
+//       //     ToastAndroid.CENTER,
+//       //   );
+//       // } else {
+//       //   // if status not equal to 200 run below block
+//       //   await Promise.all([createVehicleInOut(receiptNo, type, id, "S", vehicleNumber.toUpperCase(), currentTime.toISOString(), dev_mod, operatorName, userId, imei_no, 0, "Y", 0, false), increaseReceiptNo(receiptNo), handlePrintReceipt(receiptNo, imei_no, false)])
+//       // }
 
-        //store new vehicle data using createVehicleInOut() 
-        //increaseReceiptNo by 1 
-        // generate print using  handlePrintReceipt()
+//         //store new vehicle data using createVehicleInOut() 
+//         //increaseReceiptNo by 1 
+//         // generate print using  handlePrintReceipt()
        
-        //  and return from here no internet connectivity
-        return
-      };
+//         //  and return from here no internet connectivity
+//         return
+//       };
       
 
       //  if you wonder why we are call createOrUpdateVehicleInOut() for status 200 and not equal 200
@@ -325,49 +325,49 @@ const CreateReceipt = ({ navigation, route }) => {
         handleFixedModePrintReceipt(receiptNo, isGst, gstPrice.totalPrice, gstPrice.CGST, gstPrice.SGST, gstPrice.price)
         ])
       // if  online run below block 
-      if (isOnline) {
-         // init InData with important values
-      // which are mandatory for uploading data to the server
-      const InData = [
-        {
-          receiptNo: receiptNo,
-          date_time_in: currentTime.toISOString(),
-          oprn_mode: dev_mod,
-          vehicle_id: id,
-          vehicle_no: vehicleNumber.toUpperCase(),
-          receipt_type: 'S',
-          mc_srl_no: imei_no,
-          gst_flag: isGst,
-          cgst: gstPrice.CGST,
-          sgst: gstPrice.SGST,
-          base_amt: gstPrice.price,
-          paid_amt: gstPrice.totalPrice
-        },
-      ];
+      // if (isOnline) {
+      //    // init InData with important values
+      // // which are mandatory for uploading data to the server
+      // const InData = [
+      //   {
+      //     receiptNo: receiptNo,
+      //     date_time_in: currentTime.toISOString(),
+      //     oprn_mode: dev_mod,
+      //     vehicle_id: id,
+      //     vehicle_no: vehicleNumber.toUpperCase(),
+      //     receipt_type: 'S',
+      //     mc_srl_no: imei_no,
+      //     gst_flag: isGst,
+      //     cgst: gstPrice.CGST,
+      //     sgst: gstPrice.SGST,
+      //     base_amt: gstPrice.price,
+      //     paid_amt: gstPrice.totalPrice
+      //   },
+      // ];
 
-      // store handleVehicleIn() return values in response
-      const response = await handleVehicleIn(InData);
-      console.log("___________________ subham Da ___________________", InData)
+      // // store handleVehicleIn() return values in response
+      // const response = await handleVehicleIn(InData);
+      // console.log("___________________ subham Da ___________________", InData)
 
-      if (response.status === 200) {
+      // if (response.status === 200) {
 
-        // if status  equal to 200 run below block
-        await Promise.all([createOrUpdateVehicleInOut(receiptNo, type, id, "S", vehicleNumber.toUpperCase(), currentTime.toISOString(), dev_mod, operatorName, userId, imei_no, null, null, gstPrice.totalPrice, isGst, null, null, 0, false, false, gstPrice.price, gstPrice.CGST, gstPrice.SGST), increaseReceiptNo(receiptNo), handleFixedModePrintReceipt(receiptNo, isGst, gstPrice.totalPrice, gstPrice.CGST, gstPrice.SGST, gstPrice.price)])
+      //   // if status  equal to 200 run below block
+      //   await Promise.all([createOrUpdateVehicleInOut(receiptNo, type, id, "S", vehicleNumber.toUpperCase(), currentTime.toISOString(), dev_mod, operatorName, userId, imei_no, null, null, gstPrice.totalPrice, isGst, null, null, 0, false, false, gstPrice.price, gstPrice.CGST, gstPrice.SGST), increaseReceiptNo(receiptNo), handleFixedModePrintReceipt(receiptNo, isGst, gstPrice.totalPrice, gstPrice.CGST, gstPrice.SGST, gstPrice.price)])
 
-        ToastAndroid.showWithGravity(
-          'Uploaded',
-          ToastAndroid.LONG,
-          ToastAndroid.CENTER,
-        );
-      } else {
-        // if status not equal to 200 run below block
-        await Promise.all([createOrUpdateVehicleInOut(receiptNo, type, id, "S", vehicleNumber.toUpperCase(), currentTime.toISOString(), dev_mod, operatorName, userId, imei_no, null, null, gstPrice.totalPrice, isGst, null, null, 0, false, false, gstPrice.price, gstPrice.CGST, gstPrice.SGST), increaseReceiptNo(receiptNo), handleFixedModePrintReceipt(receiptNo, isGst, gstPrice.totalPrice, gstPrice.CGST, gstPrice.SGST, gstPrice.price)])
-      }
+      //   ToastAndroid.showWithGravity(
+      //     'Uploaded',
+      //     ToastAndroid.LONG,
+      //     ToastAndroid.CENTER,
+      //   );
+      // } else {
+      //   // if status not equal to 200 run below block
+      //   await Promise.all([createOrUpdateVehicleInOut(receiptNo, type, id, "S", vehicleNumber.toUpperCase(), currentTime.toISOString(), dev_mod, operatorName, userId, imei_no, null, null, gstPrice.totalPrice, isGst, null, null, 0, false, false, gstPrice.price, gstPrice.CGST, gstPrice.SGST), increaseReceiptNo(receiptNo), handleFixedModePrintReceipt(receiptNo, isGst, gstPrice.totalPrice, gstPrice.CGST, gstPrice.SGST, gstPrice.price)])
+      // }
 
       
-        //  and return from here no internet connectivity
-        return
-      };
+      //   //  and return from here no internet connectivity
+      //   return
+      // };
      
 
 
@@ -431,55 +431,55 @@ const CreateReceipt = ({ navigation, route }) => {
       handleAdvancePrintReceipt(receiptNo, advancePrice[0].advance_amount, imei_no, false)
       ])
 
-      if (isOnline) {
-        const InData = [
-          {
-            receiptNo: receiptNo,
-            date_time_in: currentTime.toISOString(),
-            oprn_mode: "A",
-            vehicle_id: id,
-            vehicle_no: vehicleNumber.toUpperCase(),
-            receipt_type: 'S',
-            mc_srl_no: imei_no,
-            advance: advancePrice[0].advance_amount,
-            gst_flag: "Y"
-          },
+      // if (isOnline) {
+      //   const InData = [
+      //     {
+      //       receiptNo: receiptNo,
+      //       date_time_in: currentTime.toISOString(),
+      //       oprn_mode: "A",
+      //       vehicle_id: id,
+      //       vehicle_no: vehicleNumber.toUpperCase(),
+      //       receipt_type: 'S',
+      //       mc_srl_no: imei_no,
+      //       advance: advancePrice[0].advance_amount,
+      //       gst_flag: "Y"
+      //     },
   
-        ];
+      //   ];
   
-        console.log(InData)
-        // upload to the server
+      //   console.log(InData)
+      //   // upload to the server
   
   
-        // store handleVehicleIn() return values in response
-        const response = await handleVehicleIn(InData);
+      //   // store handleVehicleIn() return values in response
+      //   const response = await handleVehicleIn(InData);
   
-        // if (response.status === 200) {
-        //   // if status  equal to 200 run below block
-        //   // STORE,INCREASE RECEIPT NO and HANDLE PRINTOUT
-        //   console.warn("server ... ")
-        //   await Promise.all([createVehicleInOut(receiptNo, type, id, "S", vehicleNumber.toUpperCase(), currentTime.toISOString(), "A", operatorName, userId, imei_no, 0, "Y", advancePrice[0].advance_amount, true), increaseReceiptNo(receiptNo), handleAdvancePrintReceipt(receiptNo, advancePrice[0].advance_amount, imei_no, true)
-        //   ])
+      //   // if (response.status === 200) {
+      //   //   // if status  equal to 200 run below block
+      //   //   // STORE,INCREASE RECEIPT NO and HANDLE PRINTOUT
+      //   //   console.warn("server ... ")
+      //   //   await Promise.all([createVehicleInOut(receiptNo, type, id, "S", vehicleNumber.toUpperCase(), currentTime.toISOString(), "A", operatorName, userId, imei_no, 0, "Y", advancePrice[0].advance_amount, true), increaseReceiptNo(receiptNo), handleAdvancePrintReceipt(receiptNo, advancePrice[0].advance_amount, imei_no, true)
+      //   //   ])
   
-        //   ToastAndroid.showWithGravity(
-        //     'Uploaded',
-        //     ToastAndroid.SHORT,
-        //     ToastAndroid.CENTER,
-        //   );
-        // } else {
-        //   // if status not equal to 200 run below block
-        //   // STORE,INCREASE RECEIPT NO and HANDLE PRINTOUT
-        //   await Promise.all([createVehicleInOut(receiptNo, type, id, "S", vehicleNumber.toUpperCase(), currentTime.toISOString(), "A", operatorName, userId, imei_no, 0, "Y", advancePrice[0].advance_amount, false), increaseReceiptNo(receiptNo), handleAdvancePrintReceipt(receiptNo, advancePrice[0].advance_amount, imei_no, false)
-        //   ])
-        // }
+      //   //   ToastAndroid.showWithGravity(
+      //   //     'Uploaded',
+      //   //     ToastAndroid.SHORT,
+      //   //     ToastAndroid.CENTER,
+      //   //   );
+      //   // } else {
+      //   //   // if status not equal to 200 run below block
+      //   //   // STORE,INCREASE RECEIPT NO and HANDLE PRINTOUT
+      //   //   await Promise.all([createVehicleInOut(receiptNo, type, id, "S", vehicleNumber.toUpperCase(), currentTime.toISOString(), "A", operatorName, userId, imei_no, 0, "Y", advancePrice[0].advance_amount, false), increaseReceiptNo(receiptNo), handleAdvancePrintReceipt(receiptNo, advancePrice[0].advance_amount, imei_no, false)
+      //   //   ])
+      //   // }
 
-        //store new vehicle data using createVehicleInOut() 
-        //increaseReceiptNo by 1 
-        // generate print using  handlePrintReceipt()
+      //   //store new vehicle data using createVehicleInOut() 
+      //   //increaseReceiptNo by 1 
+      //   // generate print using  handlePrintReceipt()
       
-        //  and return from here no internet connectivity
-        return
-      };
+      //   //  and return from here no internet connectivity
+      //   return
+      // };
       // init InData with important values
       // which are mandatory for uploading data to the server
     

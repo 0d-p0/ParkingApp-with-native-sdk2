@@ -1,4 +1,4 @@
-import { ScrollView, StyleSheet, Text, TextInput, View, PixelRatio, TouchableOpacity, Image } from 'react-native'
+import { ScrollView, StyleSheet, Text, TextInput, View, PixelRatio, TouchableOpacity, Image, Button } from 'react-native'
 import React, { useState, useEffect } from 'react'
 import CustomHeader from '../../component/CustomHeader'
 import allColor from '../../Resources/Colors/Color'
@@ -10,7 +10,7 @@ import ReceiptImageStorage from '../../Hooks/Sql/Receipt Setting Storage/Receipt
 
 const ReceiptSetting = ({ navigation }) => {
     const { receiptSettings } = getReceiptSettings()
-    const { addNewReceiptImage, getReceiptImage } = ReceiptImageStorage()
+    const { addNewReceiptImage, getReceiptImage, deleteReceiptImage } = ReceiptImageStorage()
     const [pic, setPic] = useState()
     const [update, setUpdate] = useState(false)
     //    {"footer1": "Test footer1", "footer2": "Test footer2", "header1": "Test header1", "header2": "Test header2", "id": 5, "image": "image.jpeg"}
@@ -132,7 +132,7 @@ const ReceiptSetting = ({ navigation }) => {
                 </View>
                 {/* IMAGE CONTAINER */}
                 <View style={{ flexDirection: 'row', gap: 10 }}>
-                    <TouchableOpacity onLongPress={() => setPic()}>
+                    <TouchableOpacity>
                         {pic && <Image
                             style={{ width: 100, height: 100, borderRadius: 10 }}
                             source={{ uri: pic }}
@@ -144,7 +144,13 @@ const ReceiptSetting = ({ navigation }) => {
                             {pic ? "Change Image" : "ADD IMAGE"}
                         </Text>
                     </TouchableOpacity>
-
+                    {pic && (
+                        <Button title='Remove' onPress={() => {
+                            setPic(null)
+                            deleteReceiptImage()
+                        }} />
+                    )}
+ 
                     {/* <TouchableOpacity style={{ borderStyle: 'dashed', borderRadius: 10, borderColor: allColor['primary-color'], borderWidth: 2, width: 100 }} onPress={print}>
                         <Text style={{ padding: 20 }}>
                             loop

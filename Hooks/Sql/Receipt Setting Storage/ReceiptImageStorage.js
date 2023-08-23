@@ -117,7 +117,9 @@ function ReceiptImageStorage() {
     }
 
 
-    async function deleteReceiptImage(db) {
+    async function deleteReceiptImage() {
+        const db = await getDatabaseConnection()
+
         return new Promise((resolve, reject) => {
             db.transaction(
                 tx => {
@@ -145,7 +147,7 @@ function ReceiptImageStorage() {
         createReceiptImageTable()
     }, [])
 
-    return { addNewReceiptImage, getReceiptImage }
+    return { addNewReceiptImage, getReceiptImage, deleteReceiptImage }
 }
 
 export default ReceiptImageStorage

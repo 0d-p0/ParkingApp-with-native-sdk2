@@ -446,7 +446,7 @@ const OutpassScreen = ({ navigation }) => {
           }}>
           {/* {loading && <ActivityIndicator size="large" />} */}
 
-          <ScrollView style={{ width: '100%' }}>
+          <ScrollView style={{ width: '100%' }} keyboardShouldPersistTaps={'handled'}>
             {data &&
               data.map((props, index) => {
                 const formatTime = new Date(props.date_time_in);

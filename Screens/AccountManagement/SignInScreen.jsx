@@ -36,7 +36,7 @@ const SignInScreen = ({ navigation }) => {
   // createUser ("pritam",'123')
   return (
     <MainView>
-      <ScrollView>
+      <ScrollView keyboardShouldPersistTaps={'handled'}>
         <HeaderLogoComponent />
 
 

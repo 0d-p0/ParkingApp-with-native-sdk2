@@ -732,7 +732,7 @@ const CreateReceipt = ({ navigation, route }) => {
       )}
 
 
-      <ScrollView>
+      <ScrollView keyboardShouldPersistTaps={'handled'}>
         {/* render custom header */}
         <CustomHeader title={'RECEIPT'} navigation={navigation} />
         <View style={{ padding: PixelRatio.roundToNearestPixel(30) }}>

@@ -341,7 +341,8 @@ const OutpassScreen = ({ navigation }) => {
       }
       if (inVehiledata.length != 0) {
         const token = await retrieveAuthUser();
-        inVehiledata.forEach(async element => {
+
+        for (const element of inVehiledata){
           const newVinData = [element];
           await axios
             .post(
@@ -366,7 +367,7 @@ const OutpassScreen = ({ navigation }) => {
               );
               console.error(error);
             });
-        });
+        }
       }
 
       const outVechileData = await getAllOutVehicles();
@@ -383,7 +384,8 @@ const OutpassScreen = ({ navigation }) => {
 
       if (outVechileData.length != 0) {
         const token = await retrieveAuthUser();
-        outVechileData.forEach(async element => {
+        
+        for (const element of outVechileData){
           const newVoutData = [element];
           await axios
             .post(
@@ -403,16 +405,11 @@ const OutpassScreen = ({ navigation }) => {
               ToastAndroid.show('some error occur!', ToastAndroid.LONG);
               console.error('----------------errror------------------', error);
             });
-        });
+        }
+
       }
 
-      // if(data.length != 0){
-      //   for (const item of data){
-      //     await axios.post(address.leave,{ "receiptNo":item.receiptNo,  "outPassNumber":item.outPassNumber, "outTime":item.outTime ,"duration":item.duration}).then(res=>console.warn(res.data)).then(()=>{
-      //        deleteDataById(item.outPassNumber)
-      //     }).catch(error=>{console.error(error)})
-      //   }
-      // }
+    
     } catch (error) {
       console.error('error from ', error);
     }

@@ -48,8 +48,7 @@ const App = () => {
       }
       if (inVehiledata.length != 0) {
         const token = await retrieveAuthUser();
-        inVehiledata.forEach(async element => {
-          console.log("loop run ",element)
+        for (const element of inVehiledata){
           const newVinData = [element]
           await axios
             .post(
@@ -66,8 +65,8 @@ const App = () => {
             .catch(error => {
               console.error(error);
             });
-
-        });
+        }
+    
 
       }
 
@@ -79,7 +78,7 @@ const App = () => {
 
       if (outVechileData.length != 0) {
         const token = await retrieveAuthUser();
-        outVechileData.forEach(async element => {
+        for(const element of outVechileData){
           const newVoutData = [element]
           await axios
             .post(
@@ -97,8 +96,7 @@ const App = () => {
               console.log(error.status)
               console.error("----------------errror------------------", error);
             });
-        });
-
+        }
       }
 
   
@@ -124,7 +122,7 @@ const App = () => {
   useEffect(() => {
 
     if (isOnline) {
-      uploadDataToTheServer()
+      // uploadDataToTheServer()
       deleteOneMonthOldDataToTheServer()
     }
     

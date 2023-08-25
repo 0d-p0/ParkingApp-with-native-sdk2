@@ -89,7 +89,7 @@ const OutpassScreen = ({ navigation }) => {
             return {
               paid_amt: Price,
               ...rest,
-              date_time_out: date.toISOString(),
+              date_time_out: date.toISOString().slice(0, -5) + "Z",
             }; // Create a new object with the modified key name and the rest of the properties
           });
           setData(filteredReceiptData);

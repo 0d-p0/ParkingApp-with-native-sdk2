@@ -16,6 +16,8 @@ exports.address={
   employeeEdit:`${baseurl}/employee-edit`,
   carIn:`${baseurl}/car-in`,
   carOut:`${baseurl}/car-out`,
+  carInv2:`${baseurl}/v2/car-in`,
+  carOutv2:`${baseurl}/v2/car-out`,
   rate:`${baseurl}/rate`,
   receipt_amt:`${baseurl}/receipt-amt`,
   getCarDetails:`${baseurl}/chueked-car-in-time`,

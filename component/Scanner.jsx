@@ -97,7 +97,7 @@ const Scanner = ({ navigation }) => {
       obj[key] = newVData[index];
       return obj;
     }, {});
-    result['date_time_out'] = date.toISOString(); // Use the current date and time
+    result['date_time_out'] = date.toISOString().slice(0, -5) + "Z"; // Use the current date and time
 
     // console.log("----------- key value obj data ----",result);
 

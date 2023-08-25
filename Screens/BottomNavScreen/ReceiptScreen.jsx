@@ -9,10 +9,11 @@ import {
   ActivityIndicator,
   ToastAndroid,
   PermissionsAndroid,
-  NativeModules
+  NativeModules,
+  Button,
 } from 'react-native';
 
-import React, { useContext, useEffect, useRef, useState } from 'react';
+import React, {useContext, useEffect, useRef, useState} from 'react';
 
 import axios from 'axios';
 
@@ -24,66 +25,80 @@ import icons from '../../Resources/Icons/icons';
 import getVechicles from '../../Hooks/Controller/vechicles/getVechicles';
 import storeUsers from '../../Hooks/Sql/User/storeuser';
 import getAuthUser from '../../Hooks/getAuthUser';
-import { InternetStatusContext } from '../../App';
-import { AuthContext } from '../../Auth/AuthProvider';
+import {InternetStatusContext} from '../../App';
+import {AuthContext} from '../../Auth/AuthProvider';
 
-import { address } from '../../Router/address';
+import {address} from '../../Router/address';
 import ThermalPrinterModule from 'react-native-thermal-printer';
 import VehicleInOutStore from '../../Hooks/Sql/VehicleInOut/VehicleInOutStore';
 import getVehiclePrices from '../../Hooks/Controller/vechicles/getVehiclePrices';
-import { useIsFocused } from '@react-navigation/native';
+import {useIsFocused} from '@react-navigation/native';
 
 import BleManager from 'react-native-ble-manager';
 import getAdvancePrices from '../../Hooks/Controller/AdvancePrice/getAdvancePrices';
 import vehicleRatesStorage from '../../Hooks/Sql/vechicles/vehicleRatesStorage';
-import { changeResetReceiptNo, isResetReceiptNo } from '../../Hooks/Receipt/isResetReceiptNo';
+import {
+  changeResetReceiptNo,
+  isResetReceiptNo,
+} from '../../Hooks/Receipt/isResetReceiptNo';
 import increaseReceiptNo from '../../Hooks/Receipt/increaseReceiptNo';
 
-import bill from './bill.jpg'
+import bill from './bill.jpg';
 import advancePriceStorage from '../../Hooks/Sql/AdvancePricesStorage/advancePriceStorage';
 import gstSettingsController from '../../Hooks/Controller/GST_Settings/gstSettingsController';
 import fixedPriceController from '../../Hooks/Controller/FIxedPrice/fixedPriceController';
 import fixedPriceStorage from '../../Hooks/Sql/FixedPriceStore/fixedPriceStorage';
-
-const ReceiptScreen = ({ navigation }) => {
+import dummyData from './dummy_in_data.json';
+import uploadVehicleData from '../../Hooks/Controller/vechicles/uploadVehicleData';
+const ReceiptScreen = ({navigation}) => {
   const MyNativeModule = NativeModules.MyPrinter;
 
   const isOnline = useContext(InternetStatusContext);
-  const isFoccused = useIsFocused()
-  const { generalSetting, logOut } = useContext(AuthContext)
+  const isFoccused = useIsFocused();
+  const {generalSetting, logOut} = useContext(AuthContext);
 
   const [vechicles, setVechicles] = useState();
   // GST SETTINGS
-  const { handleGetGstSettingsFromServer } = gstSettingsController()
+  const {handleGetGstSettingsFromServer} = gstSettingsController();
   // setter and getter current time
   const [currentTime, setCurrentTime] = useState(new Date());
 
-  const { calculateTotalAmount, calculateTotalVehicleIn, calculateTotalVehicleOut, getAllInVehicles, getAllOutVehicles, updateIsUploadedINById, updateIsUploadedOUTById } = VehicleInOutStore()
-  const { getAdvancePricesByVehicleId } = advancePriceStorage()
-  const { getFixedPricesByVehicleId } = fixedPriceStorage()
-  const [totalAmount, setTotalAmount] = useState()
-  const [totalVehicleIn, setTotalVehicleIn] = useState()
-  const [totalVehicleOut, setTotalVehicleOut] = useState()
+  const {
+    calculateTotalAmount,
+    calculateTotalVehicleIn,
+    calculateTotalVehicleOut,
+    getAllInVehicles,
+    getAllOutVehicles,
+    updateIsUploadedINById,
+    updateIsUploadedOUTById,
+  } = VehicleInOutStore();
+  const {getAdvancePricesByVehicleId} = advancePriceStorage();
+  const {getFixedPricesByVehicleId} = fixedPriceStorage();
+  const [totalAmount, setTotalAmount] = useState();
+  const [totalVehicleIn, setTotalVehicleIn] = useState();
+  const [totalVehicleOut, setTotalVehicleOut] = useState();
 
+  const [receiptNo, setReceiptNo] = useState(null);
 
-  const [receiptNo, setReceiptNo] = useState(null)
+  const {getUserByToken, deleteUserById} = storeUsers();
+  const {retrieveAuthUser} = getAuthUser();
+  const {getVechiclesData} = getVechicles(setVechicles);
+  const {getVehicleRatesByVehicleId} = vehicleRatesStorage();
 
-  const { getUserByToken, deleteUserById } = storeUsers();
-  const { retrieveAuthUser } = getAuthUser();
-  const { getVechiclesData } = getVechicles(setVechicles);
-  const { getVehicleRatesByVehicleId } = vehicleRatesStorage()
-  // const { handleGetReceiptSettings } = 
+  const {uploadAllVehiclesData} = uploadVehicleData();
+  // const { handleGetReceiptSettings } =
   const [userDetails, setUserDetails] = useState();
 
   // const { ding } = playSound()
-  const [isBlueToothEnable, setIsBlueToothEnable] = useState(false)
+  const [isBlueToothEnable, setIsBlueToothEnable] = useState(false);
   async function checkBluetoothEnabled() {
     try {
       const granted = await PermissionsAndroid.request(
         PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION,
         {
           title: 'Bluetooth Permission',
-          message: 'This app needs access to your location to check Bluetooth status.',
+          message:
+            'This app needs access to your location to check Bluetooth status.',
           buttonNeutral: 'Ask Me Later',
           buttonNegative: 'Cancel',
           buttonPositive: 'OK',
@@ -94,12 +109,12 @@ const ReceiptScreen = ({ navigation }) => {
         BleManager.enableBluetooth()
           .then(() => {
             // Success code
-            setIsBlueToothEnable(true)
-            console.log("The bluetooth is already enabled or the user confirm");
+            setIsBlueToothEnable(true);
+            console.log('The bluetooth is already enabled or the user confirm');
           })
-          .catch((error) => {
+          .catch(error => {
             // Failure code
-            console.log("The user refuse to enable bluetooth");
+            console.log('The user refuse to enable bluetooth');
           });
         // const isEnabled = await BluetoothStatus.isEnabled();
         // console.log('Bluetooth Enabled:', isEnabled);
@@ -113,23 +128,27 @@ const ReceiptScreen = ({ navigation }) => {
 
   // {"carin": 3, "carout": 3, "totalCollection": "170.00"}
   const todayCollectionArray = [
-    { title: 'Operator Name', data: userDetails?.name },
-    { title: 'Total vehicles In', data: totalVehicleIn },
-    { title: 'Total vehicles Out', data: totalVehicleOut },
-    { title: 'Total Collection', data: totalAmount || 0 },
+    {title: 'Operator Name', data: userDetails?.name},
+    {title: 'Total vehicles In', data: totalVehicleIn},
+    {title: 'Total vehicles Out', data: totalVehicleOut},
+    {title: 'Total Collection', data: totalAmount || 0},
   ];
 
   const handlePlay = async () => {
-    await checkBluetoothEnabled()
+    await checkBluetoothEnabled();
 
     if (!isBlueToothEnable) {
-      ToastAndroid.show('please enable the bluetooth first', ToastAndroid.SHORT);
-      return
+      ToastAndroid.show(
+        'please enable the bluetooth first',
+        ToastAndroid.SHORT,
+      );
+      return;
     }
 
     try {
       await ThermalPrinterModule.printBluetooth({
-        payload: `[C]<u><font size='tall'>${userDetails?.companyname.toUpperCase()}</font></u>\n` +
+        payload:
+          `[C]<u><font size='tall'>${userDetails?.companyname.toUpperCase()}</font></u>\n` +
           '[c]-----------------------\n' +
           `[L]<font size='normal'>NAME : ${userDetails?.name.toUpperCase()}</font>\n` +
           `[L]<font size='normal'>PHONE No. : ${userDetails?.user_id}</font>\n` +
@@ -148,7 +167,6 @@ const ReceiptScreen = ({ navigation }) => {
     }
   };
 
-
   const getStoreVechiclesData = async () => {
     const data = await getVechiclesData();
     if (data != 0) {
@@ -156,26 +174,38 @@ const ReceiptScreen = ({ navigation }) => {
     }
   };
 
-
   async function getUserDetails() {
     try {
       // Perform asynchronous operations here
       const token = await retrieveAuthUser();
       const user = await getUserByToken(token);
-      console.log("user details", user)
+      console.log('user details', user);
       setUserDetails(user);
-      await updateVehicleRates(token, user.sub_client_id)
-
+      await updateVehicleRates(token, user.sub_client_id);
     } catch (error) {
       console.error(error);
     }
   }
 
-
-
-
   const uploadDataToTheServer = async () => {
-    console.log("----------------------upload to the server -----------------")
+
+    if (isOnline) {
+      await uploadAllVehiclesData();
+    }
+
+    if (!isOnline) {
+      ToastAndroid.showWithGravityAndOffset(
+        'please connect to the internet first',
+        ToastAndroid.LONG,
+        ToastAndroid.CENTER,
+        25,
+        50,
+      );
+      return;
+    }
+
+    return;
+    console.log('----------------------upload to the server -----------------');
     try {
       if (!isOnline) {
         ToastAndroid.showWithGravityAndOffset(
@@ -184,40 +214,40 @@ const ReceiptScreen = ({ navigation }) => {
           ToastAndroid.CENTER,
           25,
           50,
-        )
-        return
+        );
+        return;
       }
       // handle offline INVCHILE DATA SYNC
       const inVehiledata = await getAllInVehicles();
       if (inVehiledata.length == 0) {
-        console.log('already syn')
+        console.log('already syn');
         ToastAndroid.showWithGravityAndOffset(
           'already syn',
           ToastAndroid.LONG,
           ToastAndroid.CENTER,
           25,
           50,
-        )
+        );
       }
       if (inVehiledata.length != 0) {
-        console.log("---------IN car--------------", inVehiledata)
-        
+        console.log('---------IN car--------------', inVehiledata);
+
         const token = await retrieveAuthUser();
 
-        for(const element of inVehiledata){
-          const newVinData = [element]
+        for (const element of inVehiledata) {
+          const newVinData = [element];
           await axios
             .post(
               address.carIn,
-              { data: newVinData },
+              {data: newVinData},
               {
-                headers: { Authorization: `Bearer ${token}` },
+                headers: {Authorization: `Bearer ${token}`},
               },
             )
             .then(async res => {
-              console.log("in data", res.data);
+              console.log('in data', res.data);
               ToastAndroid.show('receipt uploaded!', ToastAndroid.SHORT);
-              updateIsUploadedINById(element.date_time_in)
+              updateIsUploadedINById(element.date_time_in);
             })
             .catch(error => {
               ToastAndroid.showWithGravityAndOffset(
@@ -228,52 +258,48 @@ const ReceiptScreen = ({ navigation }) => {
                 50,
               );
               console.error(error);
-              console.warn("errior")
+              console.warn('errior');
             });
         }
-
       }
 
-      const outVechileData = await getAllOutVehicles()
+      const outVechileData = await getAllOutVehicles();
       if (outVechileData.length == 0) {
-        console.log('already syn')
+        console.log('already syn');
         ToastAndroid.showWithGravityAndOffset(
           'already syn',
           ToastAndroid.LONG,
           ToastAndroid.CENTER,
           25,
           50,
-        )
+        );
       }
-      console.log("---------out car--------------", outVechileData)
+      console.log('---------out car--------------', outVechileData);
 
       if (outVechileData.length != 0) {
         const token = await retrieveAuthUser();
-        for (const element of outVechileData){
-          const newVoutData = [element]
+        for (const element of outVechileData) {
+          const newVoutData = [element];
           await axios
             .post(
               address.carOut,
-              { data: newVoutData },
+              {data: newVoutData},
               {
-                headers: { Authorization: `Bearer ${token}` },
+                headers: {Authorization: `Bearer ${token}`},
               },
             )
             .then(async res => {
-              console.log("----------------out data------------", res.data);
+              console.log('----------------out data------------', res.data);
               ToastAndroid.show('Out pass uploaded !', ToastAndroid.LONG);
-              updateIsUploadedOUTById(element.date_time_in)
+              updateIsUploadedOUTById(element.date_time_in);
             })
             .catch(error => {
-              console.log(error.status)
+              console.log(error.status);
               ToastAndroid.show('some error occur!', ToastAndroid.LONG);
-              console.error("----------------errror------------------", error);
+              console.error('----------------errror------------------', error);
             });
         }
-
       }
-
-   
     } catch (error) {
       console.error('error from ', error);
     }
@@ -282,11 +308,14 @@ const ReceiptScreen = ({ navigation }) => {
   const handleSamplePrintReceipt = async () => {
     // const result = await getVehicleRatesByVehicleId(id);
     //  checkBluetoothEnabled()
-    await checkBluetoothEnabled()
+    await checkBluetoothEnabled();
 
     if (!isBlueToothEnable) {
-      ToastAndroid.show('please enable the bluetooth first', ToastAndroid.SHORT);
-      return
+      ToastAndroid.show(
+        'please enable the bluetooth first',
+        ToastAndroid.SHORT,
+      );
+      return;
     }
     try {
       await ThermalPrinterModule.printBluetooth({
@@ -304,66 +333,67 @@ const ReceiptScreen = ({ navigation }) => {
     }
   };
   // UPDATE VEHICLE RATES IN EVERY NEW RENDER IF ONLONE
-  const { handleGetAllVehiclesRates } = getVehiclePrices()
-  const { handleGetAllAdvancePrices } = getAdvancePrices()
-  const { handleGetAllFixedPrices } = fixedPriceController()
+  const {handleGetAllVehiclesRates} = getVehiclePrices();
+  const {handleGetAllAdvancePrices} = getAdvancePrices();
+  const {handleGetAllFixedPrices} = fixedPriceController();
   const updateVehicleRates = async (token, sub_client_id) => {
     if (isOnline) {
-      await handleGetAllVehiclesRates(token, sub_client_id)
+      await handleGetAllVehiclesRates(token, sub_client_id);
       // if(generalSetting.dev_mod == "A")
-      await handleGetAllAdvancePrices(token, sub_client_id)
-      await handleGetAllFixedPrices(token, sub_client_id)
-      await handleGetGstSettingsFromServer()
+      await handleGetAllAdvancePrices(token, sub_client_id);
+      await handleGetAllFixedPrices(token, sub_client_id);
+      await handleGetGstSettingsFromServer();
     }
-
-  }
+  };
 
   const handleResetReceipt = async () => {
     // {"is_reset_receipt_number": false, "time": null}
-    const current_date_time = new Date()
+    const current_date_time = new Date();
 
-    const data = await isResetReceiptNo()
-    const date = new Date()
-    date.setHours(0, 0)
-    date.setDate(date.getDate() + 1)
-    console.log(data)
+    const data = await isResetReceiptNo();
+    const date = new Date();
+    date.setHours(0, 0);
+    date.setDate(date.getDate() + 1);
+    console.log(data);
 
-    const { time } = data
+    const {time} = data;
 
-    if (generalSetting?.reset_recipeit_no == "D") {
-
+    if (generalSetting?.reset_recipeit_no == 'D') {
       if (time == null || time < current_date_time) {
-
-        Promise.all(increaseReceiptNo(-1),
-          changeResetReceiptNo(true, date))
+        Promise.all(increaseReceiptNo(-1), changeResetReceiptNo(true, date));
       }
     }
-
-  }
+  };
   async function checkUserIsAvailable() {
     if (isOnline && userDetails) {
       // console.log(`${address.isUser}?user_id=${userDetails?.user_id}`)
       try {
-        const res = await axios.get(`${address.isUser}?user_id=${userDetails?.user_id}`, {
-          headers: {
-            Authorization: `Bearer ${userDetails?.token}`,
-          }
-        })
+        const res = await axios.get(
+          `${address.isUser}?user_id=${userDetails?.user_id}`,
+          {
+            headers: {
+              Authorization: `Bearer ${userDetails?.token}`,
+            },
+          },
+        );
         if (res?.data?.data == 0) {
-          alert("please login again \n no User found")
-          await deleteUserById(userDetails?.user_id)
-          return logOut()
+          alert('please login again \n no User found');
+          await deleteUserById(userDetails?.user_id);
+          return logOut();
         }
-        console.log("_____________________IS USER AUTH_______________________", res.data)
+        console.log(
+          '_____________________IS USER AUTH_______________________',
+          res.data,
+        );
       } catch (error) {
         if (error.response) {
           // The client was given an error response (5xx, 4xx)
           console.log(error.response.data);
           console.log(error.response.status);
           if (error.response.status == 401) {
-            await deleteUserById(userDetails?.user_id)
-            alert("please login again \n no User found")
-            return logOut()
+            await deleteUserById(userDetails?.user_id);
+            alert('please login again \n no User found');
+            return logOut();
           }
           console.log(error.response.headers);
         } else if (error.request) {
@@ -375,7 +405,6 @@ const ReceiptScreen = ({ navigation }) => {
     }
   }
 
-
   useEffect(() => {
     getUserDetails();
     getStoreVechiclesData();
@@ -383,15 +412,22 @@ const ReceiptScreen = ({ navigation }) => {
   }, [isOnline]);
   useEffect(() => {
     if (isFoccused) {
-      checkUserIsAvailable()
+      checkUserIsAvailable();
     }
-
-  }, [isOnline, userDetails, isFoccused])
+  }, [isOnline, userDetails, isFoccused]);
   useEffect(() => {
     if (isFoccused) {
-      calculateTotalAmount().then(res => { setTotalAmount(Math.round(res*100)/100) }).catch(err => console.error(err))
-      calculateTotalVehicleIn().then(res => setTotalVehicleIn(res)).catch(err => console.error(err))
-      calculateTotalVehicleOut().then(res => setTotalVehicleOut(res)).catch(err => console.error(err))
+      calculateTotalAmount()
+        .then(res => {
+          setTotalAmount(Math.round(res * 100) / 100);
+        })
+        .catch(err => console.error(err));
+      calculateTotalVehicleIn()
+        .then(res => setTotalVehicleIn(res))
+        .catch(err => console.error(err));
+      calculateTotalVehicleOut()
+        .then(res => setTotalVehicleOut(res))
+        .catch(err => console.error(err));
     }
   }, [isFoccused]);
 
@@ -413,24 +449,21 @@ const ReceiptScreen = ({ navigation }) => {
     return () => clearInterval(timer);
   }, []);
 
-
-
-
-  const handleNavigation = async (props) => {
+  const handleNavigation = async props => {
     const result = await getVehicleRatesByVehicleId(props.vehicle_id);
-    if (result.length == 0 && generalSetting?.dev_mod != "F") {
+    if (result.length == 0 && generalSetting?.dev_mod != 'F') {
       ToastAndroid.showWithGravityAndOffset(
         'Vehicle Rate Not available contact owner',
         ToastAndroid.LONG,
         ToastAndroid.CENTER,
         25,
         50,
-      )
-      return
+      );
+      return;
     }
     let advancePrice = false;
-    if (generalSetting.adv_pay == "Y" && generalSetting?.dev_mod != "F") {
-      advancePrice = await getAdvancePricesByVehicleId(props.vehicle_id)
+    if (generalSetting.adv_pay == 'Y' && generalSetting?.dev_mod != 'F') {
+      advancePrice = await getAdvancePricesByVehicleId(props.vehicle_id);
       if (advancePrice.length == 0) {
         ToastAndroid.showWithGravityAndOffset(
           'Advance price Not available contact owner',
@@ -438,13 +471,13 @@ const ReceiptScreen = ({ navigation }) => {
           ToastAndroid.CENTER,
           25,
           50,
-        )
-        return
+        );
+        return;
       }
     }
     let fixedPrice = false;
-    if (generalSetting?.dev_mod == "F") {
-      fixedPrice = await getFixedPricesByVehicleId(props.vehicle_id)
+    if (generalSetting?.dev_mod == 'F') {
+      fixedPrice = await getFixedPricesByVehicleId(props.vehicle_id);
       // alert(JSON.stringify(fixedPrice))
       if (fixedPrice.length == 0) {
         ToastAndroid.showWithGravityAndOffset(
@@ -453,8 +486,8 @@ const ReceiptScreen = ({ navigation }) => {
           ToastAndroid.CENTER,
           25,
           50,
-        )
-        return
+        );
+        return;
       }
     }
     navigation.navigate('create_receipt', {
@@ -466,18 +499,60 @@ const ReceiptScreen = ({ navigation }) => {
       currentDayTotalReceipt: totalVehicleIn,
       imei_no: userDetails?.imei_no,
       advanceData: advancePrice,
-      fixedPriceData: fixedPrice
+      fixedPriceData: fixedPrice,
     });
-  }
+  };
+
+  const {createVehicleInOut} = VehicleInOutStore();
+  const [dummyDataLoadig, setDummyDataLoding] = useState(false);
+
+  const generateDummyData = async () => {
+    if (dummyDataLoadig) {
+      return;
+    }
+    setDummyDataLoding(true);
+
+    // await uploadAllVehiclesData().then(res=>console.log("hey ----------------",res)).catch(eror=>{
+    //   console.error("hey ------------------- error")
+    // })
+    for (const item of dummyData) {
+      await createVehicleInOut(
+        item.receiptNo,
+        item.type,
+        item.id,
+        'S',
+        item.veh_no.toString().toUpperCase(),
+        currentTime.toISOString().slice(0, -5) + 'Z',
+        'D',
+        item.operator_name,
+        item.user_id,
+        item.imei_no,
+        0,
+        'N',
+        0,
+        false,
+      );
+    }
+
+    setDummyDataLoding(false);
+  };
 
   return (
-    <View style={{ flex: 1 }}>
+    <View style={{flex: 1}}>
       <CustomHeader title={'RECEIPT'} />
-
 
       {/* today total receipt */}
       <Text style={styles.title}>Today`s Collection</Text>
-      <Text style={{ ...styles.title, fontSize: PixelRatio.roundToNearestPixel(14), padding: 0, paddingBottom: PixelRatio.roundToNearestPixel(4), paddingTop: -20 }}>{currentTime.toLocaleDateString()} - {currentTime.toLocaleTimeString()}</Text>
+      <Text
+        style={{
+          ...styles.title,
+          fontSize: PixelRatio.roundToNearestPixel(14),
+          padding: 0,
+          paddingBottom: PixelRatio.roundToNearestPixel(4),
+          paddingTop: -20,
+        }}>
+        {currentTime.toLocaleDateString()} - {currentTime.toLocaleTimeString()}
+      </Text>
       {/* today collection table */}
       <View style={styles.today_collection}>
         {todayCollectionArray.map((props, index) => (
@@ -518,27 +593,48 @@ const ReceiptScreen = ({ navigation }) => {
           {icons.print}
         </TouchableOpacity>
       </View>
+      <View>
+        {dummyDataLoadig && (
+          <Text style={{fontWeight: '700', color: 'red', fontSize: 20}}>
+            {' '}
+            please wait dummy data storing ......{' '}
+          </Text>
+        )}
 
+        <Button
+          onPress={generateDummyData}
+          title="generate dummy in data"
+          disabled={dummyDataLoadig}
+        />
+      </View>
       {/* vehicle container */}
-      <View style={{ ...otherStyle.vehicle_container, bottom: 20, alignSelf: 'center' }}>
+      <View
+        style={{
+          ...otherStyle.vehicle_container,
+          bottom: 20,
+          alignSelf: 'center',
+        }}>
         {!generalSetting?.dev_mod && <ActivityIndicator size="large" />}
       </View>
 
-      {generalSetting?.dev_mod != "B" && <ScrollView horizontal={true} style={otherStyle.vehicle_container}>
-        {vechicles &&
-          vechicles.map((props, index) => (
-            <Pressable
-              key={index}
-              style={otherStyle.vehicle}
-              onPress={() => {
-                handleNavigation(props)
-
-              }}>
-              {icons.dynamicvechicleIcon(props.vehicle_icon)}
-              <Text style={otherStyle.vehicle_name}>{props.vehicle_name}</Text>
-            </Pressable>
-          ))}
-      </ScrollView>}
+      {generalSetting?.dev_mod != 'B' && (
+        <ScrollView horizontal={true} style={otherStyle.vehicle_container}>
+          {vechicles &&
+            vechicles.map((props, index) => (
+              <Pressable
+                key={index}
+                style={otherStyle.vehicle}
+                onPress={() => {
+                  handleNavigation(props);
+                }}>
+                {icons.dynamicvechicleIcon(props.vehicle_icon)}
+                <Text style={otherStyle.vehicle_name}>
+                  {props.vehicle_name}
+                </Text>
+              </Pressable>
+            ))}
+        </ScrollView>
+      )}
     </View>
   );
 };
@@ -595,7 +691,7 @@ const otherStyle = StyleSheet.create({
 <Pressable
   style={otherStyle.vehicle}
   onPress={() => {
-    navigation.navigate('create_receipt', { type: 'BIKE' });
+    navigation.navigate('create_receipt', {type: 'BIKE'});
     handlePlay();
   }}>
   {icons.bike}
@@ -607,7 +703,7 @@ const otherStyle = StyleSheet.create({
 <Pressable
   style={otherStyle.vehicle}
   onPress={() => {
-    navigation.navigate('create_receipt', { type: 'CAR' });
+    navigation.navigate('create_receipt', {type: 'CAR'});
     handlePlay();
   }}>
   {icons.car}
@@ -619,7 +715,7 @@ const otherStyle = StyleSheet.create({
 <Pressable
   style={otherStyle.vehicle}
   onPress={() => {
-    navigation.navigate('create_receipt', { type: 'BIKE' });
+    navigation.navigate('create_receipt', {type: 'BIKE'});
     handlePlay();
   }}>
   {icons.truck}

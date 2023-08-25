@@ -26,12 +26,19 @@ function VehicleInOutStore() {
     console.log("is uploaded in ", isUploadedIN)
 
     const db = await getDatabaseConnection()
+
+
+    console.log("-------------------------",receiptNo,
+      vehicleType, vehicle_id, receipt_type, vehicle_no, date_time_in, oprn_mode, opratorName, user_id_in, mc_srl_no, paid_amt, gst_flag, advance, isUploadedIN)
+
     return new Promise((resolve, reject) => {
       if (
-        !receiptNo, !vehicleType || !vehicle_id || !receipt_type || !vehicle_no || !date_time_in || !oprn_mode || !opratorName || !user_id_in || !mc_srl_no || !paid_amt || !gst_flag || !advance
+        !receiptNo, !vehicleType || !vehicle_id || !receipt_type || !vehicle_no || !date_time_in || !oprn_mode || !opratorName || !user_id_in || !mc_srl_no || !gst_flag
       ) {
         reject('Please add all the fields');
       }
+
+
       db.transaction(
         tx => {
           tx.executeSql(
@@ -637,6 +644,85 @@ function VehicleInOutStore() {
     });
   }
 
+  const updateMultipleisUploadedIn = async (dataToUpdate) => {
+    const db = await getDatabaseConnection();
+  
+    // Convert date-time strings to ISO format
+    const isoDateTimes = dataToUpdate.map(dateTime => new Date(dateTime).toISOString().slice(0, -5) + "Z");
+    
+    const placeholders = isoDateTimes.map(() => '?').join(', ');
+    // 2023-08-25 18:02:23 ->  2023-08-25 18:05:23", "2023-08-25 18:05:30
+    //?, ?     placeholders -------------------- 2023-08-25T12:35:23.000Z 2023-08-25T12:35:30.000Z
+    console.log(placeholders,"    placeholders --------------------",...isoDateTimes)
+
+    const query = `UPDATE vehicleInOutTable SET isUploadedIN = ? WHERE date_time_in IN (${placeholders})`;
+
+    console.log("query is == ",query)
+    //  LOG  query is ==  UPDATE vehicleInOutTable SET isUploadedIN = ? WHERE date_time_in IN (?, ?)
+  
+    return new Promise((resolve, reject) => {
+      db.transaction(tx => {
+        tx.executeSql(
+          query,
+          [1, ...isoDateTimes],
+          (_, resultSet) => {
+            if (resultSet.rowsAffected > 0) {
+              console.log("--------------------------------------true ----------")
+              resolve(true); // Successfully updated
+            } else {
+              console.log("--------------------------------------  false ----------")
+              resolve(false); // No records found or update unsuccessful
+            }
+          },
+          (_, error) => {
+            console.log("-------------------------------------- error ----------")
+            reject(error); // Error occurred during the update
+          }
+        );
+      });
+    });
+  };
+  
+
+
+  const updateMultipleisUploadedOut = async (dataToUpdate) => {
+    const db = await getDatabaseConnection();
+  
+    // Convert date-time strings to ISO format
+    const isoDateTimes = dataToUpdate.map(dateTime => new Date(dateTime).toISOString().slice(0, -5) + "Z");
+    
+    const placeholders = isoDateTimes.map(() => '?').join(', ');
+    // 2023-08-25 18:02:23 ->  2023-08-25 18:05:23", "2023-08-25 18:05:30
+    //?, ?     placeholders -------------------- 2023-08-25T12:35:23.000Z 2023-08-25T12:35:30.000Z
+    console.log(placeholders,"    placeholders --------------------",...isoDateTimes)
+
+    const query = `UPDATE vehicleInOutTable SET isUploadedOUT = ? WHERE date_time_out IN (${placeholders})`;
+
+    console.log("query is == ",query)
+    //  LOG  query is ==  UPDATE vehicleInOutTable SET isUploadedIN = ? WHERE date_time_in IN (?, ?)
+  
+    return new Promise((resolve, reject) => {
+      db.transaction(tx => {
+        tx.executeSql(
+          query,
+          [1, ...isoDateTimes],
+          (_, resultSet) => {
+            if (resultSet.rowsAffected > 0) {
+              console.log("--------------------------------------true ----------")
+              resolve(true); // Successfully updated
+            } else {
+              console.log("--------------------------------------  false ----------")
+              resolve(false); // No records found or update unsuccessful
+            }
+          },
+          (_, error) => {
+            console.log("-------------------------------------- error ----------")
+            reject(error); // Error occurred during the update
+          }
+        );
+      });
+    });
+  };
   useEffect(() => {
     createVehicleInOutTable()
     //  getAllVehicles().then(res=>console.log("--------pio-----------",res)).catch(err=>console.error(err))
@@ -653,6 +739,8 @@ function VehicleInOutStore() {
     handleCheckIsVehicleOut,
     getAllInVehiclesPastMonth,
     getAllOutVehiclesPastMonth,
+    updateMultipleisUploadedIn,
+    updateMultipleisUploadedOut
   }
 }
 

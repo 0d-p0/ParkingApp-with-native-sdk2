@@ -215,7 +215,7 @@ const CreateReceipt = ({ navigation, route }) => {
        
 
 
-      await Promise.all([createVehicleInOut(receiptNo, type, id, "S", vehicleNumber.toUpperCase(), currentTime.toISOString(), dev_mod, operatorName, userId, imei_no, 0, "Y", 0, false), increaseReceiptNo(receiptNo),
+      await Promise.all([createVehicleInOut(receiptNo, type, id, "S", vehicleNumber.toUpperCase(), currentTime.toISOString().slice(0, -5) + "Z", dev_mod, operatorName, userId, imei_no, 0, "N", 0, false), increaseReceiptNo(receiptNo),
       handlePrintReceipt(receiptNo, imei_no, false)
       ])
       // if not online run below block 
@@ -321,7 +321,7 @@ const CreateReceipt = ({ navigation, route }) => {
          //store new vehicle data using createVehicleInOut() 
         //increaseReceiptNo by 1 
         // generate print using  handlePrintReceipt()
-        await Promise.all([createOrUpdateVehicleInOut(receiptNo, type, id, "S", vehicleNumber.toUpperCase(), currentTime.toISOString(), dev_mod, operatorName, userId, imei_no, null, null, gstPrice.totalPrice, isGst, null, null, 0, false, false, gstPrice.price, gstPrice.CGST, gstPrice.SGST), increaseReceiptNo(receiptNo),
+        await Promise.all([createOrUpdateVehicleInOut(receiptNo, type, id, "S", vehicleNumber.toUpperCase(), currentTime.toISOString().slice(0, -5) + "Z", dev_mod, operatorName, userId, imei_no, null, null, gstPrice.totalPrice, isGst, null, null, 0, false, false, gstPrice.price, gstPrice.CGST, gstPrice.SGST), increaseReceiptNo(receiptNo),
         handleFixedModePrintReceipt(receiptNo, isGst, gstPrice.totalPrice, gstPrice.CGST, gstPrice.SGST, gstPrice.price)
         ])
       // if  online run below block 
@@ -427,7 +427,7 @@ const CreateReceipt = ({ navigation, route }) => {
         return;
       }
 
-      await Promise.all([createVehicleInOut(receiptNo, type, id, "S", vehicleNumber.toUpperCase(), currentTime.toISOString(), "A", operatorName, userId, imei_no, 0, "Y", advancePrice[0].advance_amount, false), increaseReceiptNo(receiptNo),
+      await Promise.all([createVehicleInOut(receiptNo, type, id, "S", vehicleNumber.toUpperCase(), currentTime.toISOString().slice(0, -5) + "Z", "A", operatorName, userId, imei_no, 0, "Y", advancePrice[0].advance_amount, false), increaseReceiptNo(receiptNo),
       handleAdvancePrintReceipt(receiptNo, advancePrice[0].advance_amount, imei_no, false)
       ])
 
@@ -501,7 +501,7 @@ const CreateReceipt = ({ navigation, route }) => {
       vehicle_id: id,
       receipt_type: 'S',
       vehicle_no: vehicleNumber,
-      date_time_in: currentTime.toISOString(),
+      date_time_in: currentTime.toISOString().slice(0, -5) + "Z",
       oprn_mode: dev_mod,
       opratorName: operatorName,
       user_id_in: userId,
@@ -528,7 +528,7 @@ const CreateReceipt = ({ navigation, route }) => {
         `[L]<b>VEHICLE TYPE : ${type}\n` +
         `[L]<b>VEHICLE NO : ${vehicleNumber.toUpperCase()}\n` +
         `[L]<b>IN Time : ${formattedDateTime}\n\n` +
-        `[R]<qrcode size='35'>${receiptNo}-*-${type}-*-${id}-*-${'S'}-*-${vehicleNumber.toUpperCase()}-*-${currentTime.toISOString()}-*-${dev_mod}-*-${operatorName}-*-${userId}-*-${mc_srl_no}-*-${0}-*-${"Y"}-*-${0}-*-${isUploadedIN}</qrcode>\n\n`
+        `[R]<qrcode size='35'>${receiptNo}-*-${type}-*-${id}-*-${'S'}-*-${vehicleNumber.toUpperCase()}-*-${currentTime.toISOString().slice(0, -5) + "Z"}-*-${dev_mod}-*-${operatorName}-*-${userId}-*-${mc_srl_no}-*-${0}-*-${"Y"}-*-${0}-*-${isUploadedIN}</qrcode>\n\n`
 
       if (receiptSettings.footer1_flag == "1") {
         payload += `[C] ${receiptSettings.footer1} \n`
@@ -635,7 +635,7 @@ const CreateReceipt = ({ navigation, route }) => {
         `[L]<b>VEHICLE NO : ${vehicleNumber.toUpperCase()}\n` +
         `[L]<b>ADVANCE : ${advance}\n` +
         `[L]<b>IN Time : ${formattedDateTime}\n\n` +
-        `[R]<qrcode size='35'>${receiptNo}-*-${type}-*-${id}-*-${'S'}-*-${vehicleNumber.toUpperCase()}-*-${currentTime.toISOString()}-*-${"A"}-*-${operatorName}-*-${userId}-*-${mc_srl_no}-*-${0}-*-${"Y"}-*-${advance}-*-${isUploadedIN}-*-${adv_pay}</qrcode>\n\n`
+        `[R]<qrcode size='35'>${receiptNo}-*-${type}-*-${id}-*-${'S'}-*-${vehicleNumber.toUpperCase()}-*-${currentTime.toISOString().slice(0, -5) + "Z"}-*-${"A"}-*-${operatorName}-*-${userId}-*-${mc_srl_no}-*-${0}-*-${"Y"}-*-${advance}-*-${isUploadedIN}-*-${adv_pay}</qrcode>\n\n`
 
 
       if (receiptSettings.footer1_flag == "1") {

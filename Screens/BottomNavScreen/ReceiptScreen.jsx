@@ -71,6 +71,7 @@ const ReceiptScreen = ({navigation}) => {
     getAllOutVehicles,
     updateIsUploadedINById,
     updateIsUploadedOUTById,
+    calculateStatistics
   } = VehicleInOutStore();
   const {getAdvancePricesByVehicleId} = advancePriceStorage();
   const {getFixedPricesByVehicleId} = fixedPriceStorage();
@@ -415,30 +416,33 @@ const ReceiptScreen = ({navigation}) => {
       checkUserIsAvailable();
     }
   }, [isOnline, userDetails, isFoccused]);
+
   useEffect(() => {
     if (isFoccused) {
-      calculateTotalAmount()
-        .then(res => {
-          setTotalAmount(Math.round(res * 100) / 100);
-        })
-        .catch(err => console.error(err));
-      calculateTotalVehicleIn()
-        .then(res => setTotalVehicleIn(res))
-        .catch(err => console.error(err));
-      calculateTotalVehicleOut()
-        .then(res => setTotalVehicleOut(res))
-        .catch(err => console.error(err));
+      // totalAmount": 0, "vehicleInCount": 30169, "vehicleOutCount":
+      calculateStatistics() .then(res => {
+       console.log("-----------------------------------------------",res)
+       setTotalAmount(Math.round(res.totalAmount * 100) / 100);
+       setTotalVehicleIn(res.vehicleInCount)
+       setTotalVehicleOut(res.vehicleOutCount)
+
+      })
+      .catch(err => console.error(err));
+
+      // calculateTotalAmount()
+      //   .then(res => {
+      //     setTotalAmount(Math.round(res * 100) / 100);
+      //   })
+      //   .catch(err => console.error(err));
+      // calculateTotalVehicleIn()
+      //   .then(res => setTotalVehicleIn(res))
+      //   .catch(err => console.error(err));
+      // calculateTotalVehicleOut()
+      //   .then(res => setTotalVehicleOut(res))
+      //   .catch(err => console.error(err));
     }
   }, [isFoccused]);
 
-  // const uploadButton = useRef()
-
-  // useEffect(() => {
-  //   let clrInterval = setInterval(() => {
-  //     uploadButton.click()
-  //   }, 2 * 60 * 1000)
-  //   return () => clearInterval(clrInterval)
-  // }, [])
 
   // reinitiate the current time and date
   useEffect(() => {
@@ -503,52 +507,52 @@ const ReceiptScreen = ({navigation}) => {
     });
   };
 
-  const {createVehicleInOut,amit,getAllVehicles} = VehicleInOutStore();
+  const {createVehicleInOut,amit} = VehicleInOutStore();
   const [dummyDataLoadig, setDummyDataLoding] = useState(false);
   function delay(milliseconds) {
     return new Promise(resolve => setTimeout(resolve, milliseconds));
   }
   const generateDummyData = async () => {
 
-     amit().then(res=>console.log("---------------**********amit**********---------",res)).catch(err=>{
-      console.log("---------------**********amit**********---------",err)
-    })
+    //  amit().then(res=>console.log("---------------**********amit**********---------",res)).catch(err=>{
+    //   console.log("---------------**********amit**********---------",err)
+    // })
     
     if (dummyDataLoadig) {
       return;
     }
     
     setDummyDataLoding(true);
-    return
-    // await uploadAllVehiclesData().then(res=>console.log("hey ----------------",res)).catch(eror=>{
-    //   console.error("hey ------------------- error")
-    // })
-    for (let i = 0 ; i<dummyData.length;i++) {
+    // return
+   
+    // for (let i = 0 ; i<dummyData.length;i++) {
 
    
-      // await delay(300)
+    //   // await delay(300)
   
-      await createVehicleInOut(
-        dummyData[i].receiptNo,
-        dummyData[i].type,
-        dummyData[i].id,
-        'S',
-        i.toString().toUpperCase(),
-        currentTime.toISOString().slice(0, -5) + 'Z',
-        'D',
-        dummyData[i].operator_name,
-        dummyData[i].user_id,
-        dummyData[i].imei_no,
-        0,
-        'N',
-        0,
-        false,
-      );
-    }
+    //   await createVehicleInOut(
+    //     i+1,
+    //     dummyData[i].type,
+    //     dummyData[i].id,
+    //     'S',
+    //     i.toString().toUpperCase(),
+    //     currentTime.toISOString().slice(0, -5) + 'Z',
+    //     'D',
+    //     dummyData[i].operator_name,
+    //     dummyData[i].user_id,
+    //     dummyData[i].imei_no,
+    //     0,
+    //     'N',
+    //     0,
+    //     false,
+    //   );
+    // }
 
     setDummyDataLoding(false);
     
   };
+
+
 
   return (
     <View style={{flex: 1}}>
@@ -606,8 +610,8 @@ const ReceiptScreen = ({navigation}) => {
           {icons.print}
         </TouchableOpacity>
       </View>
-
-      {/* <View>
+{/* 
+      <View>
         {dummyDataLoadig && (
           <Text style={{fontWeight: '700', color: 'red', fontSize: 20}}>
             {' '}

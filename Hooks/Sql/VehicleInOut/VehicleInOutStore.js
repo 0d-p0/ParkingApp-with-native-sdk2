@@ -161,11 +161,12 @@ function VehicleInOutStore() {
 
   const getDataByIdOrVehicleNumberStartsWith = async pattern => {
     const db = await getDatabaseConnection();
+    const page_size = 50
     return new Promise((resolve, reject) => {
       db.transaction(
         tx => {
           tx.executeSql(
-            'SELECT * FROM vehicleInOutTable WHERE (receiptNo LIKE ? OR vehicle_no LIKE ?) AND date_time_out IS NULL AND oprn_mode <> "F"',
+            'SELECT * FROM vehicleInOutTable WHERE (receiptNo LIKE ? OR vehicle_no LIKE ?) AND date_time_out IS NULL AND oprn_mode <> "F" LIMIT 10',
             [pattern + '%', pattern + '%'],
             (_, resultSet) => {
               const { rows } = resultSet;
@@ -317,6 +318,38 @@ function VehicleInOutStore() {
       );
     });
   };
+
+
+  const calculateStatistics = async () => {
+    const db = await getDatabaseConnection();
+    const currentDate = new Date();
+    const startDate = new Date(currentDate.getFullYear(), currentDate.getMonth(), currentDate.getDate());
+    const endDate = new Date(startDate.getTime() + 24 * 60 * 60 * 1000 - 1);
+  
+    return new Promise((resolve, reject) => {
+      db.transaction(tx => {
+        tx.executeSql(
+          `SELECT
+             (SELECT COUNT(*) FROM vehicleInOutTable WHERE date_time_in >= ? AND date_time_in <= ?) AS vehicleInCount,
+             (SELECT COUNT(*) FROM vehicleInOutTable WHERE (date_time_Out >= ? AND date_time_out <= ?) AND date_time_out IS NOT NULL) AS vehicleOutCount,
+             COALESCE((SELECT SUM(paid_amt) FROM vehicleInOutTable WHERE date_time_in >= ? AND date_time_in <= ?), 0) AS totalAmount`,
+          [startDate.toISOString(), endDate.toISOString(), startDate.toISOString(), endDate.toISOString(), startDate.toISOString(), endDate.toISOString()],
+          (_, result) => {
+            const { vehicleInCount, vehicleOutCount, totalAmount } = result.rows.item(0);
+            resolve({
+              vehicleInCount,
+              vehicleOutCount,
+              totalAmount,
+            });
+          },
+          error => {
+            reject(error);
+          }
+        );
+      });
+    });
+  };
+  
 
   const getAllVehicles = async () => {
     const db = await getDatabaseConnection()
@@ -779,7 +812,8 @@ function VehicleInOutStore() {
     updateMultipleisUploadedIn,
     updateMultipleisUploadedOut,
     amit,
-    getAllVehicles
+
+    calculateStatistics
   }
 }
 

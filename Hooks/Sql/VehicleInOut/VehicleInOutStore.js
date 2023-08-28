@@ -28,7 +28,7 @@ function VehicleInOutStore() {
     const db = await getDatabaseConnection()
 
 
-    console.log("-------------------------",receiptNo,
+    console.log("-------------------------", receiptNo,
       vehicleType, vehicle_id, receipt_type, vehicle_no, date_time_in, oprn_mode, opratorName, user_id_in, mc_srl_no, paid_amt, gst_flag, advance, isUploadedIN)
 
     return new Promise((resolve, reject) => {
@@ -113,7 +113,7 @@ function VehicleInOutStore() {
                   'UPDATE vehicleInOutTable SET date_time_out = ?, user_id_out = ?, mc_srl_no_out = ?, duration = ?, paid_amt = ?, isUploadedOUT = ?, gst_flag = ?, base_amt = ?,cgst = ?,sgst = ? WHERE vehicle_no = ? AND date_time_in = ?',
                   [
                     date_time_out, user_id_out, mc_srl_no_out, duration, paid_amt, isUploadedOUT,
-                    gst_flag,base_amt, cgst, sgst, vehicle_no, date_time_in,
+                    gst_flag, base_amt, cgst, sgst, vehicle_no, date_time_in,
                   ],
                   (_, updateResultSet) => {
                     console.warn('vehicle in data updated ________________________________');
@@ -131,7 +131,7 @@ function VehicleInOutStore() {
                   [
                     receiptNo,
                     vehicleType, vehicle_id, receipt_type, vehicle_no, date_time_in, oprn_mode, opratorName, user_id_in, mc_srl_no, date_time_out, user_id_out, paid_amt, gst_flag, duration, mc_srl_no_out, advance, isUploadedIN, isUploadedOUT,
-                    base_amt,cgst,sgst
+                    base_amt, cgst, sgst
                   ],
                   (_, insertResultSet) => {
                     console.warn('New vehicle in data stored while outpass');
@@ -646,20 +646,22 @@ function VehicleInOutStore() {
 
   const updateMultipleisUploadedIn = async (dataToUpdate) => {
     const db = await getDatabaseConnection();
-  
+
     // Convert date-time strings to ISO format
+
+    console.log("moon dataa ", dataToUpdate.length)
     const isoDateTimes = dataToUpdate.map(dateTime => new Date(dateTime).toISOString().slice(0, -5) + "Z");
-    
+
     const placeholders = isoDateTimes.map(() => '?').join(', ');
     // 2023-08-25 18:02:23 ->  2023-08-25 18:05:23", "2023-08-25 18:05:30
     //?, ?     placeholders -------------------- 2023-08-25T12:35:23.000Z 2023-08-25T12:35:30.000Z
-    console.log(placeholders,"    placeholders --------------------",...isoDateTimes)
+    console.log(placeholders, "    placeholders --------------------", ...isoDateTimes)
 
     const query = `UPDATE vehicleInOutTable SET isUploadedIN = ? WHERE date_time_in IN (${placeholders})`;
 
-    console.log("query is == ",query)
+    console.log("query is == ", query)
     //  LOG  query is ==  UPDATE vehicleInOutTable SET isUploadedIN = ? WHERE date_time_in IN (?, ?)
-  
+
     return new Promise((resolve, reject) => {
       db.transaction(tx => {
         tx.executeSql(
@@ -682,25 +684,25 @@ function VehicleInOutStore() {
       });
     });
   };
-  
+
 
 
   const updateMultipleisUploadedOut = async (dataToUpdate) => {
     const db = await getDatabaseConnection();
-  
+
     // Convert date-time strings to ISO format
     const isoDateTimes = dataToUpdate.map(dateTime => new Date(dateTime).toISOString().slice(0, -5) + "Z");
-    
+
     const placeholders = isoDateTimes.map(() => '?').join(', ');
     // 2023-08-25 18:02:23 ->  2023-08-25 18:05:23", "2023-08-25 18:05:30
     //?, ?     placeholders -------------------- 2023-08-25T12:35:23.000Z 2023-08-25T12:35:30.000Z
-    console.log(placeholders,"    placeholders --------------------",...isoDateTimes)
+    console.log(placeholders, "    placeholders --------------------", ...isoDateTimes)
 
     const query = `UPDATE vehicleInOutTable SET isUploadedOUT = ? WHERE date_time_out IN (${placeholders})`;
 
-    console.log("query is == ",query)
+    console.log("query is == ", query)
     //  LOG  query is ==  UPDATE vehicleInOutTable SET isUploadedIN = ? WHERE date_time_in IN (?, ?)
-  
+
     return new Promise((resolve, reject) => {
       db.transaction(tx => {
         tx.executeSql(
@@ -723,9 +725,44 @@ function VehicleInOutStore() {
       });
     });
   };
+
+
+
+  const amit = async (date_time_out, user_id_out, mc_srl_no_out, duration, paid_amt, isUploadedOUT,
+    gst_flag, base_amt, cgst, sgst, vehicle_no, date_time_in) => {
+    const db = await getDatabaseConnection();
+    return new Promise((resolve, reject) => {
+      db.transaction(tx => {
+        tx.executeSql(
+          'UPDATE vehicleInOutTable SET date_time_out = ?, user_id_out = ?, mc_srl_no_out = ?, duration = ?, paid_amt = ?, isUploadedOUT = ?, gst_flag = ?, base_amt = ?,cgst = ?,sgst = ? ',
+          [
+            "2023-08-28T09:04:52Z", '1', '1234567890', 0, 200, false,
+            "N", 0, 0, 0,
+          ],
+
+          (_, resultSet) => {
+            if (resultSet.rowsAffected > 0) {
+              resolve(true); // Successfully updated
+            } else {
+              resolve(false); // Record not found or update unsuccessful
+            }
+          },
+          (_, error) => {
+            reject(error); // Error occurred during the update
+          }
+        );
+      });
+    });
+  };
+
+
   useEffect(() => {
     createVehicleInOutTable()
     //  getAllVehicles().then(res=>console.log("--------pio-----------",res)).catch(err=>console.error(err))
+
+    // amit().then(res=>console.log("---------------**********amit**********---------",res)).catch(err=>{
+    //   console.log("---------------**********amit**********---------",err)
+    // })
   }, [])
 
   return {
@@ -740,7 +777,9 @@ function VehicleInOutStore() {
     getAllInVehiclesPastMonth,
     getAllOutVehiclesPastMonth,
     updateMultipleisUploadedIn,
-    updateMultipleisUploadedOut
+    updateMultipleisUploadedOut,
+    amit,
+    getAllVehicles
   }
 }
 

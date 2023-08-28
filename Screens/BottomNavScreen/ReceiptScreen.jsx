@@ -381,10 +381,10 @@ const ReceiptScreen = ({navigation}) => {
           await deleteUserById(userDetails?.user_id);
           return logOut();
         }
-        console.log(
-          '_____________________IS USER AUTH_______________________',
-          res.data,
-        );
+        // console.log(
+        //   '_____________________IS USER AUTH_______________________',
+        //   res.data,
+        // );
       } catch (error) {
         if (error.response) {
           // The client was given an error response (5xx, 4xx)
@@ -503,30 +503,42 @@ const ReceiptScreen = ({navigation}) => {
     });
   };
 
-  const {createVehicleInOut} = VehicleInOutStore();
+  const {createVehicleInOut,amit,getAllVehicles} = VehicleInOutStore();
   const [dummyDataLoadig, setDummyDataLoding] = useState(false);
-
+  function delay(milliseconds) {
+    return new Promise(resolve => setTimeout(resolve, milliseconds));
+  }
   const generateDummyData = async () => {
+
+     amit().then(res=>console.log("---------------**********amit**********---------",res)).catch(err=>{
+      console.log("---------------**********amit**********---------",err)
+    })
+    
     if (dummyDataLoadig) {
       return;
     }
+    
     setDummyDataLoding(true);
-
+    return
     // await uploadAllVehiclesData().then(res=>console.log("hey ----------------",res)).catch(eror=>{
     //   console.error("hey ------------------- error")
     // })
-    for (const item of dummyData) {
+    for (let i = 0 ; i<dummyData.length;i++) {
+
+   
+      // await delay(300)
+  
       await createVehicleInOut(
-        item.receiptNo,
-        item.type,
-        item.id,
+        dummyData[i].receiptNo,
+        dummyData[i].type,
+        dummyData[i].id,
         'S',
-        item.veh_no.toString().toUpperCase(),
+        i.toString().toUpperCase(),
         currentTime.toISOString().slice(0, -5) + 'Z',
         'D',
-        item.operator_name,
-        item.user_id,
-        item.imei_no,
+        dummyData[i].operator_name,
+        dummyData[i].user_id,
+        dummyData[i].imei_no,
         0,
         'N',
         0,
@@ -535,6 +547,7 @@ const ReceiptScreen = ({navigation}) => {
     }
 
     setDummyDataLoding(false);
+    
   };
 
   return (
@@ -593,7 +606,8 @@ const ReceiptScreen = ({navigation}) => {
           {icons.print}
         </TouchableOpacity>
       </View>
-      <View>
+
+      {/* <View>
         {dummyDataLoadig && (
           <Text style={{fontWeight: '700', color: 'red', fontSize: 20}}>
             {' '}
@@ -606,7 +620,7 @@ const ReceiptScreen = ({navigation}) => {
           title="generate dummy in data"
           disabled={dummyDataLoadig}
         />
-      </View>
+      </View> */}
       {/* vehicle container */}
       <View
         style={{

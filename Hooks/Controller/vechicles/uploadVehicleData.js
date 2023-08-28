@@ -14,6 +14,7 @@ function uploadVehicleData() {
   }
 
   async function uploadINDataBatch(batch, token) {
+    await delay(1000)
     await axios
       .post(
         address.carInv2,
@@ -32,6 +33,7 @@ function uploadVehicleData() {
   }
 
   async function uploadOutDataBatch(batch, token) {
+    await delay(1000)
     await axios
       .post(
         address.carOutv2,
@@ -65,6 +67,7 @@ function uploadVehicleData() {
         return
      }
 
+     console.log("oikk", allVehiclesOutdata.length);
     for (let i = 0; i < allVehiclesIndata.length; i += batchSize) {
       console.log('---------------------------i', i, '   in data');
       const batch = allVehiclesIndata.slice(i, i + batchSize);

@@ -54,12 +54,14 @@ const App = () => {
   };
 
   const uploadDataToTheServer = async () => {
+
     console.log(
       '----------------------upload to the server from APP every interval----------------- is online',
       isOnline,
     );
 
     if (isOnline) {
+   
       await uploadAllVehiclesData();
     }
     return;
@@ -146,9 +148,9 @@ const App = () => {
 
   useEffect(() => {
     const clrInterval = setInterval(() => {
-      console.log('hey its running');
+      // console.warn('hey its running');
       uploadDataToTheServer();
-    }, 1 * 60 * 1000);
+    }, 30 * 60 * 1000);
     return () => clearInterval(clrInterval);
   }, [isOnline]);
 

@@ -6,9 +6,9 @@ import {
   ScrollView,
   ActivityIndicator,
   ToastAndroid,
-  PermissionsAndroid
+  PermissionsAndroid,
 } from 'react-native';
-import React, { useContext, useEffect, useState } from 'react';
+import React, {useContext, useEffect, useState} from 'react';
 
 import CustomHeader from '../../component/CustomHeader';
 import icons from '../../Resources/Icons/icons';
@@ -19,9 +19,9 @@ import CustomButtonComponent from '../../component/CustomButtonComponent';
 import receiptDataBase from '../../Hooks/Sql/receipt/receiptDataBase';
 import increaseReceiptNo from '../../Hooks/Receipt/increaseReceiptNo';
 import vehicleINOUTController from '../../Hooks/Controller/receipt/vehicleINOUTController';
-import { AuthContext } from '../../Auth/AuthProvider';
+import {AuthContext} from '../../Auth/AuthProvider';
 import ThermalPrinterModule from 'react-native-thermal-printer';
-import { InternetStatusContext } from '../../App';
+import {InternetStatusContext} from '../../App';
 import vehicleRatesStorage from '../../Hooks/Sql/vechicles/vehicleRatesStorage';
 import currentReceiptNo from '../../Hooks/Receipt/currentReceiptNo';
 
@@ -34,39 +34,36 @@ import ReceiptImageStorage from '../../Hooks/Sql/Receipt Setting Storage/Receipt
 import gstSettingsController from '../../Hooks/Controller/GST_Settings/gstSettingsController';
 import GstPriceCalculator from '../../Hooks/PriceCalculator/GstPriceCalculator';
 
-const CreateReceipt = ({ navigation, route }) => {
+const CreateReceipt = ({navigation, route}) => {
   // check is Internet available or not
   const isOnline = useContext(InternetStatusContext);
 
-
   // loading when a vehicle in and prinout Process goes on
   const [loading, setLoading] = useState(false);
-  const [pic, setPic] = useState()
+  const [pic, setPic] = useState();
 
   // get general settings from authcontext provider
-  const { generalSetting } = useContext(AuthContext);
+  const {generalSetting} = useContext(AuthContext);
 
   // GET GST SETTINGS
-  const { handleGetGstSettingsFromStorage } = gstSettingsController()
+  const {handleGetGstSettingsFromStorage} = gstSettingsController();
 
-
-  //Destructuring dev_mod, max_receipt, and adv_pay from generalSetting. 
-  const { dev_mod, max_receipt, adv_pay } = generalSetting;
+  //Destructuring dev_mod, max_receipt, and adv_pay from generalSetting.
+  const {dev_mod, max_receipt, adv_pay} = generalSetting;
 
   // hooks that handle  vehicle rates by vehicleID
-  const { getVehicleRatesByVehicleId } = vehicleRatesStorage();
+  const {getVehicleRatesByVehicleId} = vehicleRatesStorage();
   // hooks that  handle vehicle rates by vehicleID
-  const { getAdvancePricesByVehicleId } = advancePriceStorage()
+  const {getAdvancePricesByVehicleId} = advancePriceStorage();
 
   // function handle offline storage
-  const { createVehicleInOut, createOrUpdateVehicleInOut } = VehicleInOutStore()
+  const {createVehicleInOut, createOrUpdateVehicleInOut} = VehicleInOutStore();
 
-  // this state store RECEIPT SETTINGS 
-  const { receiptSettings } = getReceiptSettings()
+  // this state store RECEIPT SETTINGS
+  const {receiptSettings} = getReceiptSettings();
 
   // hooks handle to get the LOGO from local storage
-  const { getReceiptImage } = ReceiptImageStorage()
-
+  const {getReceiptImage} = ReceiptImageStorage();
 
   // vehicleNumber input controller
   const [vehicleNumber, setVehicleNumber] = useState('');
@@ -87,17 +84,26 @@ const CreateReceipt = ({ navigation, route }) => {
   // console.log("------------------",currentTime.toISOString("en-US"))
 
   // VEHICLE IN/OUT CONTROLLER
-  const { handleVehicleIn } = vehicleINOUTController();
+  const {handleVehicleIn} = vehicleINOUTController();
 
   // const { ding } = playSound()
 
   // get data from previous screen
   // Data is extracted from the route.params, including type, id, userId, operatorName, and currentDayTotalReceipt.
-  const { type, id, userId, operatorName, currentDayTotalReceipt, imei_no, advanceData, fixedPriceData } = route.params;
+  const {
+    type,
+    id,
+    userId,
+    operatorName,
+    currentDayTotalReceipt,
+    imei_no,
+    advanceData,
+    fixedPriceData,
+  } = route.params;
 
   //This State holds isBlueToothEnable enable or not.
 
-  const [isBlueToothEnable, setIsBlueToothEnable] = useState(false)
+  const [isBlueToothEnable, setIsBlueToothEnable] = useState(false);
   // function to check isBlueToothEnable?
   async function checkBluetoothEnabled() {
     try {
@@ -105,7 +111,8 @@ const CreateReceipt = ({ navigation, route }) => {
         PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION,
         {
           title: 'Bluetooth Permission',
-          message: 'This app needs access to your location to check Bluetooth status.',
+          message:
+            'This app needs access to your location to check Bluetooth status.',
           buttonNeutral: 'Ask Me Later',
           buttonNegative: 'Cancel',
           buttonPositive: 'OK',
@@ -116,18 +123,18 @@ const CreateReceipt = ({ navigation, route }) => {
         BleManager.enableBluetooth()
           .then(() => {
             // Success code
-            setIsBlueToothEnable(true)
-            console.log("The bluetooth is already enabled or the user confirm");
+            setIsBlueToothEnable(true);
+            console.log('The bluetooth is already enabled or the user confirm');
           })
-          .catch((error) => {
+          .catch(error => {
             // Failure code
-            console.log("The user refuse to enable bluetooth");
+            console.log('The user refuse to enable bluetooth');
           });
         // const isEnabled = await BluetoothStatus.isEnabled();
         // console.log('Bluetooth Enabled:', isEnabled);
       } else {
         // if bluetooth is not enabled call this functions it`s self.
-        checkBluetoothEnabled()
+        checkBluetoothEnabled();
         console.log('Bluetooth permission denied');
       }
     } catch (error) {
@@ -135,8 +142,7 @@ const CreateReceipt = ({ navigation, route }) => {
     }
   }
 
-
-  // check READ_PHONE_STATE available or not 
+  // check READ_PHONE_STATE available or not
   const isPermitted = async () => {
     try {
       const granted = await PermissionsAndroid.request(
@@ -163,8 +169,8 @@ const CreateReceipt = ({ navigation, route }) => {
 
   // reinitiate the current time and date
   useEffect(() => {
-    checkBluetoothEnabled()
-    isPermitted()
+    checkBluetoothEnabled();
+    isPermitted();
     const timer = setInterval(() => {
       setCurrentTime(new Date());
     }, 1000);
@@ -187,8 +193,11 @@ const CreateReceipt = ({ navigation, route }) => {
 
     // if bluetooth not enabled then return fro here
     if (!isBlueToothEnable) {
-      ToastAndroid.show('please enable the bluetooth first', ToastAndroid.SHORT);
-      return
+      ToastAndroid.show(
+        'please enable the bluetooth first',
+        ToastAndroid.SHORT,
+      );
+      return;
     }
     // receiptNo holds the return value of currentReceiptNo
     const receiptNo = await currentReceiptNo();
@@ -207,58 +216,72 @@ const CreateReceipt = ({ navigation, route }) => {
               style: 'cancel',
             },
 
-            { text: 'OK', onPress: isPermitted },
+            {text: 'OK', onPress: isPermitted},
           ],
         );
         return;
       }
-       
 
+      await Promise.all([
+        createVehicleInOut(
+          receiptNo,
+          type,
+          id,
+          'S',
+          vehicleNumber.toUpperCase(),
+          currentTime.toISOString().slice(0, -5) + 'Z',
+          dev_mod,
+          operatorName,
+          userId,
+          imei_no,
+          0,
+          'N',
+          0,
+          false,
+        ),
+        increaseReceiptNo(receiptNo),
+        handlePrintReceipt(receiptNo, imei_no, false),
+      ]);
+      // if not online run below block
+      //       if (isOnline) {
+      // // init InData with important values
+      //       // which are mandatory for uploading data to the server
+      //       const InData = [
+      //         {
+      //           receiptNo: receiptNo,
+      //           date_time_in: currentTime.toISOString(),
+      //           oprn_mode: dev_mod,
+      //           vehicle_id: id,
+      //           vehicle_no: vehicleNumber.toUpperCase(),
+      //           receipt_type: 'S',
+      //           mc_srl_no: imei_no,
+      //           gst_flag: "Y"
+      //         },
+      //       ];
 
-      await Promise.all([createVehicleInOut(receiptNo, type, id, "S", vehicleNumber.toUpperCase(), currentTime.toISOString().slice(0, -5) + "Z", dev_mod, operatorName, userId, imei_no, 0, "N", 0, false), increaseReceiptNo(receiptNo),
-      handlePrintReceipt(receiptNo, imei_no, false)
-      ])
-      // if not online run below block 
-//       if (isOnline) {
-// // init InData with important values
-//       // which are mandatory for uploading data to the server
-//       const InData = [
-//         {
-//           receiptNo: receiptNo,
-//           date_time_in: currentTime.toISOString(),
-//           oprn_mode: dev_mod,
-//           vehicle_id: id,
-//           vehicle_no: vehicleNumber.toUpperCase(),
-//           receipt_type: 'S',
-//           mc_srl_no: imei_no,
-//           gst_flag: "Y"
-//         },
-//       ];
+      //       // store handleVehicleIn() return values in response
+      //       const response = await handleVehicleIn(InData);
+      //       // if (response.status === 200) {
+      //       //   // if status  equal to 200 run below block
+      //       //   await Promise.all([createVehicleInOut(receiptNo, type, id, "S", vehicleNumber.toUpperCase(), currentTime.toISOString(), dev_mod, operatorName, userId, imei_no, 0, "Y", 0, true), increaseReceiptNo(receiptNo), handlePrintReceipt(receiptNo, imei_no, true)])
 
-//       // store handleVehicleIn() return values in response
-//       const response = await handleVehicleIn(InData);
-//       // if (response.status === 200) {
-//       //   // if status  equal to 200 run below block
-//       //   await Promise.all([createVehicleInOut(receiptNo, type, id, "S", vehicleNumber.toUpperCase(), currentTime.toISOString(), dev_mod, operatorName, userId, imei_no, 0, "Y", 0, true), increaseReceiptNo(receiptNo), handlePrintReceipt(receiptNo, imei_no, true)])
+      //       //   ToastAndroid.showWithGravity(
+      //       //     'Uploaded',
+      //       //     ToastAndroid.SHORT,
+      //       //     ToastAndroid.CENTER,
+      //       //   );
+      //       // } else {
+      //       //   // if status not equal to 200 run below block
+      //       //   await Promise.all([createVehicleInOut(receiptNo, type, id, "S", vehicleNumber.toUpperCase(), currentTime.toISOString(), dev_mod, operatorName, userId, imei_no, 0, "Y", 0, false), increaseReceiptNo(receiptNo), handlePrintReceipt(receiptNo, imei_no, false)])
+      //       // }
 
-//       //   ToastAndroid.showWithGravity(
-//       //     'Uploaded',
-//       //     ToastAndroid.SHORT,
-//       //     ToastAndroid.CENTER,
-//       //   );
-//       // } else {
-//       //   // if status not equal to 200 run below block
-//       //   await Promise.all([createVehicleInOut(receiptNo, type, id, "S", vehicleNumber.toUpperCase(), currentTime.toISOString(), dev_mod, operatorName, userId, imei_no, 0, "Y", 0, false), increaseReceiptNo(receiptNo), handlePrintReceipt(receiptNo, imei_no, false)])
-//       // }
+      //         //store new vehicle data using createVehicleInOut()
+      //         //increaseReceiptNo by 1
+      //         // generate print using  handlePrintReceipt()
 
-//         //store new vehicle data using createVehicleInOut() 
-//         //increaseReceiptNo by 1 
-//         // generate print using  handlePrintReceipt()
-       
-//         //  and return from here no internet connectivity
-//         return
-//       };
-      
+      //         //  and return from here no internet connectivity
+      //         return
+      //       };
 
       //  if you wonder why we are call createOrUpdateVehicleInOut() for status 200 and not equal 200
       //Although createOrUpdateVehicleInOut () requires a lot of arguments, there is a call for isUploadedIn that can be either true or false.
@@ -284,20 +307,31 @@ const CreateReceipt = ({ navigation, route }) => {
 
     // if bluetooth not enabled then return fro here
     if (!isBlueToothEnable) {
-      ToastAndroid.show('please enable the bluetooth first', ToastAndroid.SHORT);
-      return
+      ToastAndroid.show(
+        'please enable the bluetooth first',
+        ToastAndroid.SHORT,
+      );
+      return;
     }
     // receiptNo holds the return value of currentReceiptNo
     const receiptNo = await currentReceiptNo();
     // mc_srl_no holds serial number
     // const mc_srl_no = DeviceInfo.getSerialNumberSync();
-    const gstSettings = await handleGetGstSettingsFromStorage()
-    let isGst = "N"
+    const gstSettings = await handleGetGstSettingsFromStorage();
+    let isGst = 'N';
 
-    let gstPrice = { price: 0, CGST: 0, SGST: 0, totalPrice: fixedPriceData?.[0].vehicle_rate }
-    if (gstSettings && gstSettings?.gst_flag == "1") {
-      gstPrice = GstPriceCalculator(gstSettings, fixedPriceData?.[0].vehicle_rate)
-      isGst = "Y"
+    let gstPrice = {
+      price: 0,
+      CGST: 0,
+      SGST: 0,
+      totalPrice: fixedPriceData?.[0].vehicle_rate,
+    };
+    if (gstSettings && gstSettings?.gst_flag == '1') {
+      gstPrice = GstPriceCalculator(
+        gstSettings,
+        fixedPriceData?.[0].vehicle_rate,
+      );
+      isGst = 'Y';
     }
 
     try {
@@ -312,19 +346,51 @@ const CreateReceipt = ({ navigation, route }) => {
               style: 'cancel',
             },
 
-            { text: 'OK', onPress: isPermitted },
+            {text: 'OK', onPress: isPermitted},
           ],
         );
         return;
       }
 
-         //store new vehicle data using createVehicleInOut() 
-        //increaseReceiptNo by 1 
-        // generate print using  handlePrintReceipt()
-        await Promise.all([createOrUpdateVehicleInOut(receiptNo, type, id, "S", vehicleNumber.toUpperCase(), currentTime.toISOString().slice(0, -5) + "Z", dev_mod, operatorName, userId, imei_no, null, null, gstPrice.totalPrice, isGst, null, null, 0, false, false, gstPrice.price, gstPrice.CGST, gstPrice.SGST), increaseReceiptNo(receiptNo),
-        handleFixedModePrintReceipt(receiptNo, isGst, gstPrice.totalPrice, gstPrice.CGST, gstPrice.SGST, gstPrice.price)
-        ])
-      // if  online run below block 
+      //store new vehicle data using createVehicleInOut()
+      //increaseReceiptNo by 1
+      // generate print using  handlePrintReceipt()
+      await Promise.all([
+        createOrUpdateVehicleInOut(
+          receiptNo,
+          type,
+          id,
+          'S',
+          vehicleNumber.toUpperCase(),
+          currentTime.toISOString().slice(0, -5) + 'Z',
+          dev_mod,
+          operatorName,
+          userId,
+          imei_no,
+          null,
+          null,
+          gstPrice.totalPrice,
+          isGst,
+          null,
+          null,
+          0,
+          false,
+          false,
+          gstPrice.price,
+          gstPrice.CGST,
+          gstPrice.SGST,
+        ),
+        increaseReceiptNo(receiptNo),
+        handleFixedModePrintReceipt(
+          receiptNo,
+          isGst,
+          gstPrice.totalPrice,
+          gstPrice.CGST,
+          gstPrice.SGST,
+          gstPrice.price,
+        ),
+      ]);
+      // if  online run below block
       // if (isOnline) {
       //    // init InData with important values
       // // which are mandatory for uploading data to the server
@@ -364,12 +430,9 @@ const CreateReceipt = ({ navigation, route }) => {
       //   await Promise.all([createOrUpdateVehicleInOut(receiptNo, type, id, "S", vehicleNumber.toUpperCase(), currentTime.toISOString(), dev_mod, operatorName, userId, imei_no, null, null, gstPrice.totalPrice, isGst, null, null, 0, false, false, gstPrice.price, gstPrice.CGST, gstPrice.SGST), increaseReceiptNo(receiptNo), handleFixedModePrintReceipt(receiptNo, isGst, gstPrice.totalPrice, gstPrice.CGST, gstPrice.SGST, gstPrice.price)])
       // }
 
-      
       //   //  and return from here no internet connectivity
       //   return
       // };
-     
-
 
       //  if you wonder why we are call createOrUpdateVehicleInOut() for status 200 and not equal 200
       //Although createOrUpdateVehicleInOut () requires a lot of arguments, there is a call for isUploadedIn that can be either true or false.
@@ -381,7 +444,6 @@ const CreateReceipt = ({ navigation, route }) => {
 
   // Handle offline *Advance car in
   const handelAdvanceOfflineCarIN = async () => {
-
     // if (currentDayTotalReceipt > max_receipt) {
     //   return ToastAndroid.showWithGravityAndOffset(
     //      'for ',
@@ -396,19 +458,22 @@ const CreateReceipt = ({ navigation, route }) => {
     // if bluetooth not enabled then return fro here
 
     if (!isBlueToothEnable) {
-      ToastAndroid.show('please enable the bluetooth first', ToastAndroid.SHORT);
-      return
+      ToastAndroid.show(
+        'please enable the bluetooth first',
+        ToastAndroid.SHORT,
+      );
+      return;
     }
     // store advance price in advancePrice variable
     const advancePrice = await getAdvancePricesByVehicleId(id);
-    console.log(" loopp p ", advancePrice)
+    console.log(' loopp p ', advancePrice);
     // receiptNo holds the return value of currentReceiptNo
     const receiptNo = await currentReceiptNo();
     // mc_srl_no holds serial number
 
     // const mc_srl_no = DeviceInfo.getSerialNumberSync();
     // [{"advance_amount": "50.00", "advance_id": "2", "id": 2, "subclient_id": "1", "vehicle_id": "1"}]
-    console.log("advance price is = ", advancePrice)
+    console.log('advance price is = ', advancePrice);
 
     try {
       // if READ_PHONE_STATE is not available then request for permission.
@@ -421,15 +486,37 @@ const CreateReceipt = ({ navigation, route }) => {
               text: 'Cancel',
               style: 'cancel',
             },
-            { text: 'OK', onPress: isPermitted },
+            {text: 'OK', onPress: isPermitted},
           ],
         );
         return;
       }
 
-      await Promise.all([createVehicleInOut(receiptNo, type, id, "S", vehicleNumber.toUpperCase(), currentTime.toISOString().slice(0, -5) + "Z", "A", operatorName, userId, imei_no, 0, "Y", advancePrice[0].advance_amount, false), increaseReceiptNo(receiptNo),
-      handleAdvancePrintReceipt(receiptNo, advancePrice[0].advance_amount, imei_no, false)
-      ])
+      await Promise.all([
+        createVehicleInOut(
+          receiptNo,
+          type,
+          id,
+          'S',
+          vehicleNumber.toUpperCase(),
+          currentTime.toISOString().slice(0, -5) + 'Z',
+          'A',
+          operatorName,
+          userId,
+          imei_no,
+          0,
+          'Y',
+          advancePrice[0].advance_amount,
+          false,
+        ),
+        increaseReceiptNo(receiptNo),
+        handleAdvancePrintReceipt(
+          receiptNo,
+          advancePrice[0].advance_amount,
+          imei_no,
+          false,
+        ),
+      ]);
 
       // if (isOnline) {
       //   const InData = [
@@ -444,23 +531,22 @@ const CreateReceipt = ({ navigation, route }) => {
       //       advance: advancePrice[0].advance_amount,
       //       gst_flag: "Y"
       //     },
-  
+
       //   ];
-  
+
       //   console.log(InData)
       //   // upload to the server
-  
-  
+
       //   // store handleVehicleIn() return values in response
       //   const response = await handleVehicleIn(InData);
-  
+
       //   // if (response.status === 200) {
       //   //   // if status  equal to 200 run below block
       //   //   // STORE,INCREASE RECEIPT NO and HANDLE PRINTOUT
       //   //   console.warn("server ... ")
       //   //   await Promise.all([createVehicleInOut(receiptNo, type, id, "S", vehicleNumber.toUpperCase(), currentTime.toISOString(), "A", operatorName, userId, imei_no, 0, "Y", advancePrice[0].advance_amount, true), increaseReceiptNo(receiptNo), handleAdvancePrintReceipt(receiptNo, advancePrice[0].advance_amount, imei_no, true)
       //   //   ])
-  
+
       //   //   ToastAndroid.showWithGravity(
       //   //     'Uploaded',
       //   //     ToastAndroid.SHORT,
@@ -473,16 +559,15 @@ const CreateReceipt = ({ navigation, route }) => {
       //   //   ])
       //   // }
 
-      //   //store new vehicle data using createVehicleInOut() 
-      //   //increaseReceiptNo by 1 
+      //   //store new vehicle data using createVehicleInOut()
+      //   //increaseReceiptNo by 1
       //   // generate print using  handlePrintReceipt()
-      
+
       //   //  and return from here no internet connectivity
       //   return
       // };
       // init InData with important values
       // which are mandatory for uploading data to the server
-    
 
       //  if you wonder why we are call createOrUpdateVehicleInOut() for status 200 and not equal 200
       //Although createOrUpdateVehicleInOut () requires a lot of arguments, there is a call for isUploadedIn that can be either true or false.
@@ -501,41 +586,57 @@ const CreateReceipt = ({ navigation, route }) => {
       vehicle_id: id,
       receipt_type: 'S',
       vehicle_no: vehicleNumber,
-      date_time_in: currentTime.toISOString().slice(0, -5) + "Z",
+      date_time_in: currentTime.toISOString().slice(0, -5) + 'Z',
       oprn_mode: dev_mod,
       opratorName: operatorName,
       user_id_in: userId,
       mc_srl_no: mc_srl_no,
       paid_amt: 0,
-      gst_flag: "Y",
+      gst_flag: 'Y',
       advance: 0,
-      isUploadedIN: isUploadedIN
-    }
+      isUploadedIN: isUploadedIN,
+    };
 
     try {
-      let payload = `[C]<font size='tall'><B>RECEIPT</font>\n`
+      let payload = `[C]<font size='tall'><B>RECEIPT</font>\n`;
       if (pic) {
-        payload += `[R]<img>${pic}</img>\n\n` + '\n'
+        payload += `[R]<img>${pic}</img>\n\n` + '\n';
       }
-      if (receiptSettings.header1_flag == "1") {
-        payload += `[C]<font size='tall'> ${receiptSettings.header1}</font>\n`
+      if (receiptSettings.header1_flag == '1') {
+        payload += `[C]<font size='tall'> ${receiptSettings.header1}</font>\n`;
       }
-      if (receiptSettings.header2_flag == "1") {
-        payload += `[c]${receiptSettings.header2}\n`
+      if (receiptSettings.header2_flag == '1') {
+        payload += `[c]${receiptSettings.header2}\n`;
       }
-      payload += `[C]<B><font size='big'>---------------</font>\n` +
+
+      if (receiptSettings.header3_flag == '1') {
+        payload += `[C]<font size='tall'> ${receiptSettings.header3}</font>\n`;
+      }
+      if (receiptSettings.header4_flag == '1') {
+        payload += `[c]${receiptSettings.header4}\n`;
+      }
+      payload +=
+        `[C]<B><font size='big'>---------------</font>\n` +
         `[L]<b>RECEIPT NO : ${receiptNo}\n` +
         `[L]<b>VEHICLE TYPE : ${type}\n` +
         `[L]<b>VEHICLE NO : ${vehicleNumber.toUpperCase()}\n` +
         `[L]<b>IN Time : ${formattedDateTime}\n\n` +
-        `[R]<qrcode size='35'>${receiptNo}-*-${type}-*-${id}-*-${'S'}-*-${vehicleNumber.toUpperCase()}-*-${currentTime.toISOString().slice(0, -5) + "Z"}-*-${dev_mod}-*-${operatorName}-*-${userId}-*-${mc_srl_no}-*-${0}-*-${"Y"}-*-${0}-*-${isUploadedIN}</qrcode>\n\n`
+        `[R]<qrcode size='35'>${receiptNo}-*-${type}-*-${id}-*-${'S'}-*-${vehicleNumber.toUpperCase()}-*-${
+          currentTime.toISOString().slice(0, -5) + 'Z'
+        }-*-${dev_mod}-*-${operatorName}-*-${userId}-*-${mc_srl_no}-*-${0}-*-${'Y'}-*-${0}-*-${isUploadedIN}</qrcode>\n\n`;
 
-      if (receiptSettings.footer1_flag == "1") {
-        payload += `[C] ${receiptSettings.footer1} \n`
+      if (receiptSettings.footer1_flag == '1') {
+        payload += `[C] ${receiptSettings.footer1} \n`;
+      }
+      if (receiptSettings.footer2_flag == '1') {
+        payload += `[C]${receiptSettings.footer2} \n`;
       }
 
-      if (receiptSettings.footer2_flag == "1") {
-        payload += `[C]${receiptSettings.footer2} \n`
+      if (receiptSettings.footer3_flag == '1') {
+        payload += `[C] ${receiptSettings.footer3} \n`;
+      }
+      if (receiptSettings.footer4_flag == '1') {
+        payload += `[C]${receiptSettings.footer4} \n`;
       }
       await ThermalPrinterModule.printBluetooth({
         payload: payload,
@@ -555,45 +656,53 @@ const CreateReceipt = ({ navigation, route }) => {
   };
 
   // Handle FIXED PRICE print receipt
-  const handleFixedModePrintReceipt = async (receiptNo, isGst, totalPrice, cgst, sgst, base_amt) => {
+  const handleFixedModePrintReceipt = async (
+    receiptNo,
+    isGst,
+    totalPrice,
+    cgst,
+    sgst,
+    base_amt,
+  ) => {
     // const result = await getVehicleRatesByVehicleId(id);
     try {
-      let payload = `[C]<font size='tall'><B>RECEIPT</font>\n`
+      let payload = `[C]<font size='tall'><B>RECEIPT</font>\n`;
 
       if (pic) {
-        payload += `[R]<img>${pic}</img>\n\n` + '\n'
+        payload += `[R]<img>${pic}</img>\n\n` + '\n';
       }
-      if (receiptSettings.header1_flag == "1") {
-        payload += `[C]<font size='tall'> ${receiptSettings.header1}</font>\n`
+      if (receiptSettings.header1_flag == '1') {
+        payload += `[C]<font size='tall'> ${receiptSettings.header1}</font>\n`;
       }
-      if (receiptSettings.header2_flag == "1") {
-        payload += `[c]${receiptSettings.header2}\n`
+      if (receiptSettings.header2_flag == '1') {
+        payload += `[c]${receiptSettings.header2}\n`;
       }
-      payload += `[C]<B><font size='big'>---------------</font>\n` +
+      payload +=
+        `[C]<B><font size='big'>---------------</font>\n` +
         `[L]<b>RECEIPT NO : ${receiptNo}\n` +
         `[L]<b>VEHICLE TYPE : ${type}\n` +
         `[L]<b>VEHICLE NO : ${vehicleNumber.toUpperCase()}\n` +
-        `[L]<b>IN Time : ${formattedDateTime}\n`
+        `[L]<b>IN Time : ${formattedDateTime}\n`;
 
-      if (isGst == "Y") {
-        payload += `[L]<b>BASE AMOUNT : ${base_amt}\n` +
+      if (isGst == 'Y') {
+        payload +=
+          `[L]<b>BASE AMOUNT : ${base_amt}\n` +
           `[L]<b>CGST : ${cgst}\n` +
           `[L]<b>SGST : ${sgst}\n` +
-          `[L]<b>PARKING FEES : ${totalPrice}\n\n`
+          `[L]<b>PARKING FEES : ${totalPrice}\n\n`;
       }
 
-      if (isGst == "N") {
-        payload += `[L]<b>PARKING FEES : ${totalPrice}\n\n`
+      if (isGst == 'N') {
+        payload += `[L]<b>PARKING FEES : ${totalPrice}\n\n`;
       }
 
-      if (receiptSettings.footer1_flag == "1") {
-        payload += `[C] ${receiptSettings.footer1} \n`
+      if (receiptSettings.footer1_flag == '1') {
+        payload += `[C] ${receiptSettings.footer1} \n`;
       }
 
-      if (receiptSettings.footer2_flag == "1") {
-        payload += `[C]${receiptSettings.footer2} \n`
+      if (receiptSettings.footer2_flag == '1') {
+        payload += `[C]${receiptSettings.footer2} \n`;
       }
-
 
       await ThermalPrinterModule.printBluetooth({
         payload: payload,
@@ -613,37 +722,55 @@ const CreateReceipt = ({ navigation, route }) => {
   };
 
   // HANDLE ADVANCE PRINT RECEIPT
-  const handleAdvancePrintReceipt = async (receiptNo, advance, mc_srl_no, isUploadedIN) => {
-
+  const handleAdvancePrintReceipt = async (
+    receiptNo,
+    advance,
+    mc_srl_no,
+    isUploadedIN,
+  ) => {
     try {
-
-
       let payload = `[C]<font size='tall'><B>RECEIPT</font>\n`
       if (pic) {
         payload += `[R]<img>${pic}</img>\n\n` + '\n'
       }
-      if (receiptSettings.header1_flag == "1") {
+      if (receiptSettings.header1_flag == '1') {
         payload += `[C]<font size='tall'> ${receiptSettings.header1}</font>\n`
       }
-      if (receiptSettings.header2_flag == "1") {
+      if (receiptSettings.header2_flag == '1') {
         payload += `[c]${receiptSettings.header2}\n`
       }
+      if (receiptSettings.header3_flag == '1') {
+        payload += `[c]${receiptSettings.header3}\n`
+      }
+      if (receiptSettings.header4_flag == '1') {
+        payload += `[c]${receiptSettings.header4}\n`
+      }
 
-      payload += `[C]<B><font size='big'>---------------</font>\n` +
+      payload +=
+        `[C]<B><font size='big'>---------------</font>\n` +
         `[L]<b>RECEIPT NO : ${receiptNo}\n` +
         `[L]<b>VEHICLE TYPE : ${type}\n` +
         `[L]<b>VEHICLE NO : ${vehicleNumber.toUpperCase()}\n` +
         `[L]<b>ADVANCE : ${advance}\n` +
         `[L]<b>IN Time : ${formattedDateTime}\n\n` +
-        `[R]<qrcode size='35'>${receiptNo}-*-${type}-*-${id}-*-${'S'}-*-${vehicleNumber.toUpperCase()}-*-${currentTime.toISOString().slice(0, -5) + "Z"}-*-${"A"}-*-${operatorName}-*-${userId}-*-${mc_srl_no}-*-${0}-*-${"Y"}-*-${advance}-*-${isUploadedIN}-*-${adv_pay}</qrcode>\n\n`
+        `[R]<qrcode size='35'>${receiptNo}-*-${type}-*-${id}-*-${'S'}-*-${vehicleNumber.toUpperCase()}-*-${
+          currentTime.toISOString().slice(0, -5) + 'Z'
+        }-*-${'A'}-*-${operatorName}-*-${userId}-*-${mc_srl_no}-*-${0}-*-${'Y'}-*-${advance}-*-${isUploadedIN}-*-${adv_pay}</qrcode>\n\n`
 
-
-      if (receiptSettings.footer1_flag == "1") {
+      if (receiptSettings.footer1_flag == '1') {
         payload += `[C] ${receiptSettings.footer1} \n`
       }
 
-      if (receiptSettings.footer2_flag == "1") {
+      if (receiptSettings.footer2_flag == '1') {
         payload += `[C]${receiptSettings.footer2} \n`
+      }
+
+      if (receiptSettings.footer3_flag == '1') {
+        payload += `[C] ${receiptSettings.footer3} \n`
+      }
+
+      if (receiptSettings.footer4_flag == '1') {
+        payload += `[C]${receiptSettings.footer4} \n`
       }
       await ThermalPrinterModule.printBluetooth({
         payload: payload,
@@ -660,7 +787,6 @@ const CreateReceipt = ({ navigation, route }) => {
       console.log(err.message);
     }
   };
-
 
   // main fun() for all upload and store and printing
   const handleCreateReceipt = async () => {
@@ -679,38 +805,39 @@ const CreateReceipt = ({ navigation, route }) => {
       );
     }
 
-    if (adv_pay == 'Y' && dev_mod != "F") {
+    if (adv_pay == 'Y' && dev_mod != 'F') {
       // if adv_pay is equal to Y then  below function will work
       // Y =  Yes , N = No
-      await handelAdvanceOfflineCarIN()
+      await handelAdvanceOfflineCarIN();
     }
 
-    if (adv_pay != 'Y' || dev_mod == "F") {
+    if (adv_pay != 'Y' || dev_mod == 'F') {
       // if adv_pay is Not equal to Y then  below function will work
       // Y =  Yes , N = No
-      if (dev_mod == "F") {
-        await handelFixedModCarIN()
+      if (dev_mod == 'F') {
+        await handelFixedModCarIN();
       } else {
-        await handelOfflineCarIN()
-
+        await handelOfflineCarIN();
       }
     }
     setLoading(false);
     setVehicleNumber();
 
     // navigate to previous screen
-    navigation.navigate('Receipt')
+    navigation.navigate('Receipt');
   };
 
   useEffect(() => {
-    // Get the offline stored Image 
-    getReceiptImage().then(response => {
-      // Store at pic State
-      setPic(response.image)
-    }).catch(error => {
-      console.error(error)
-    })
-  }, [])
+    // Get the offline stored Image
+    getReceiptImage()
+      .then(response => {
+        // Store at pic State
+        setPic(response.image);
+      })
+      .catch(error => {
+        console.error(error);
+      });
+  }, []);
 
   return (
     <View>
@@ -731,13 +858,12 @@ const CreateReceipt = ({ navigation, route }) => {
         </View>
       )}
 
-
       <ScrollView keyboardShouldPersistTaps={'handled'}>
         {/* render custom header */}
         <CustomHeader title={'RECEIPT'} navigation={navigation} />
-        <View style={{ padding: PixelRatio.roundToNearestPixel(30) }}>
+        <View style={{padding: PixelRatio.roundToNearestPixel(30)}}>
           {/* current time and date */}
-          <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
+          <View style={{flexDirection: 'row', justifyContent: 'space-between'}}>
             {/* date */}
             <View style={styles.date_time_container}>
               {icons.calendar}
@@ -763,27 +889,36 @@ const CreateReceipt = ({ navigation, route }) => {
           </View>
 
           {/* ......... vehicle type .......... */}
-          <View style={{ marginTop: normalize(20) }}>
+          <View style={{marginTop: normalize(20)}}>
             <Text style={styles.vehicle_text}>Vechicle Type</Text>
             <RoundedInputComponent placeholder={type} disable={true} />
           </View>
           {/* ..........receipt type ........... */}
 
-          {(advanceData || fixedPriceData) && <View style={{ marginTop: normalize(20) }}>
-            <Text style={{ ...styles.vehicle_text, color: 'red' }}> { dev_mod == "F" ? "":advanceData  && "Advance"} {fixedPriceData && "Fixed "} Price is On </Text>
-            <View
-              style={{
-                marginLeft: normalize(10),
-                flexDirection: 'row',
-                alignItems: 'center',
-              }}>
-              <Text style={{ ...styles.vehicle_text, color: 'red' }}>
-                Collect   ₹{(dev_mod == "F" ? "" : advanceData?.[0]?.advance_amount) || fixedPriceData?.[0].vehicle_rate && " money"}   from customer
+          {(advanceData || fixedPriceData) && (
+            <View style={{marginTop: normalize(20)}}>
+              <Text style={{...styles.vehicle_text, color: 'red'}}>
+                {' '}
+                {dev_mod == 'F' ? '' : advanceData && 'Advance'}{' '}
+                {fixedPriceData && 'Fixed '} Price is On{' '}
               </Text>
+              <View
+                style={{
+                  marginLeft: normalize(10),
+                  flexDirection: 'row',
+                  alignItems: 'center',
+                }}>
+                <Text style={{...styles.vehicle_text, color: 'red'}}>
+                  Collect ₹
+                  {(dev_mod == 'F' ? '' : advanceData?.[0]?.advance_amount) ||
+                    (fixedPriceData?.[0].vehicle_rate && ' money')}{' '}
+                  from customer
+                </Text>
+              </View>
             </View>
-          </View>}
+          )}
           {/* ......... vehicle Number .......... */}
-          <View style={{ marginTop: normalize(20) }}>
+          <View style={{marginTop: normalize(20)}}>
             <Text style={styles.vehicle_text}>Vechicle Number</Text>
             <RoundedInputComponent
               placeholder={'Enter Vechicle Number'}
@@ -799,21 +934,20 @@ const CreateReceipt = ({ navigation, route }) => {
               marginTop: normalize(10),
               marginHorizontal: normalize(10),
             }}>
-
             {/* GOBACK action button */}
             <CustomButtonComponent.CancelButton
               title={'Cancel'}
               onAction={() => {
                 navigation.navigate('Receipt');
               }}
-              style={{ flex: 1, marginRight: normalize(8) }}
+              style={{flex: 1, marginRight: normalize(8)}}
             />
 
             {/* Print Receipt Action Button */}
             <CustomButtonComponent.GoButton
               title={'Print Receipt'}
               onAction={() => handleCreateReceipt()}
-              style={{ flex: 1, marginLeft: normalize(8) }}
+              style={{flex: 1, marginLeft: normalize(8)}}
             />
           </View>
         </View>
@@ -1009,8 +1143,6 @@ const modalStyle = StyleSheet.create({
     </>
     } */
 }
-
-
 
 // const handelAdvanceOfflineCarIN = async () => {
 //   const result = await getVehicleRatesByVehicleId(id);

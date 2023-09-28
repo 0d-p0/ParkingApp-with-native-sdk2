@@ -34,9 +34,9 @@ function getReceiptSettings() {
         }).then(async res => {
             // console.log("from receipt settings  ", res.data.data)
             // setReceiptSettings(res.data.data[0])
-            const { header1, header2, footer1, footer2, header1_flag, header2_flag, footer1_flag, footer2_flag, image_flag } = res.data.data[0] || {}
+            const { header1, header2, header3, header4, footer1, footer2, footer3, footer4, header1_flag, header2_flag, header3_flag, header4_flag, footer1_flag, footer2_flag, footer3_flag, footer4_flag, image_flag } = res.data.data[0] || {}
             console.log(res.data.data[0])
-            addNewReceiptSetting(header1, header2, footer1, footer2, header1_flag, header2_flag, footer1_flag, footer2_flag, image_flag).then((res) => {
+            addNewReceiptSetting(header1, header2, header3, header4, footer1, footer2, footer3, footer4, header1_flag, header2_flag, header3_flag, header4_flag, footer1_flag, footer2_flag, footer3_flag, footer4_flag, image_flag).then((res) => {
                 console.log(res)
                 getAllReceiptSetting().then(res => {
                     // console.log("offline receipt settings ", res)
